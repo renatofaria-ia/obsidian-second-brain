@@ -49,6 +49,28 @@ def test_codex_cli_build_generates_expected_files():
     assert "description:" in head
 
 
+def test_hermes_build_generates_native_skills():
+    """The hermes adapter must emit one native Hermes skill per command at
+    skills/<category>/<name>/SKILL.md, with the required frontmatter Hermes
+    needs to load it (name, description, version, author, license)."""
+    result = subprocess.run(
+        ["bash", "scripts/build.sh", "--platform", "hermes"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    skill = REPO_ROOT / "dist/hermes/skills/vault/obsidian-save/SKILL.md"
+    assert skill.is_file()
+    head = skill.read_text(encoding="utf-8")[:500]
+    for field in ("name: obsidian-save", "description:", "version:", "author:", "license:"):
+        assert field in head, field
+    # Calendar/scheduled commands are Claude-only and must not leak to Hermes.
+    assert not (REPO_ROOT / "dist/hermes/skills/vault/obsidian-calendar").exists()
+
+
 def test_vault_health_json_reports_clean_linked_vault(tmp_path):
     """A minimal two-note vault with reciprocal wikilinks should report zero
     issues: no orphans, no broken links, no missing frontmatter."""

@@ -33,9 +33,10 @@ Without --platform, builds every platform listed under adapters/.
 
 Available platforms:
   claude-code   - Claude Code (slash commands + CLAUDE.md)
-  codex-cli     - OpenAI Codex CLI (AGENTS.md + .codex/commands/)
+  codex-cli     - OpenAI Codex CLI (native Agent Skills, .agents/skills/)
   gemini-cli    - Gemini CLI (GEMINI.md + .gemini/commands/)
   opencode      - OpenCode (AGENTS.md + .opencode/commands/)
+  hermes        - Nous Research Hermes Agent (native skills, skills/<category>/)
 EOF
       exit 0
       ;;

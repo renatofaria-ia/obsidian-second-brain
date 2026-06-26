@@ -604,6 +604,15 @@ Run `bash scripts/build.sh` with no arguments to build all four platforms at onc
 
 The skill is model-agnostic. The OpenCode build (and the Codex / Gemini builds) are plain instruction files, so they run on whatever model the host CLI is pointed at - including open models like [Nous Research Hermes](https://github.com/NousResearch/hermes-agent). No separate build, no code changes. You set the model on OpenCode's side.
 
+There is also a dedicated **Hermes Agent build** that emits the commands as native Hermes skills (`skills/<category>/<name>/SKILL.md`, agentskills.io-compatible), so Hermes discovers and runs them through its own Skills System rather than via a host CLI:
+
+```bash
+bash scripts/build.sh --platform hermes
+# then follow dist/hermes/INSTALL.md (copy into ~/.hermes/skills/ or add as a tap)
+```
+
+This is the skill/playbook half of the Hermes work; the bounded vault-data half is the [MCP connector](integrations/obsidian-mcp-server/). Native cron and lifecycle-hook integration are tracked in [Issue #79](https://github.com/eugeniughelbur/obsidian-second-brain/issues/79).
+
 Point OpenCode at Hermes via OpenRouter. Authenticate once (`/connect`, search OpenRouter, paste your key - or `export OPENROUTER_API_KEY=...`), then in `opencode.json`:
 
 ```json
