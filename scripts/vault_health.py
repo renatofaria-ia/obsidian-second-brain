@@ -9,7 +9,7 @@ Audits an Obsidian vault for structural issues:
 - Notes missing frontmatter
 - Notes with frontmatter trapped in a leading ```markdown code fence (unwrap, do not add)
 - Empty folders
-- Broken internal links
+- Wanted notes (links to notes not written yet - a wishlist, not errors)
 - Templates left in notes (unfilled Templater syntax)
 
 Usage:
@@ -280,7 +280,12 @@ def _normalize_dashes(s: str) -> str:
     return s.replace(_EM_DASH, "-").replace(_EN_DASH, "-")
 
 
-def check_broken_links(notes: dict, vault: Path) -> list:
+def check_wanted_notes(notes: dict, vault: Path) -> list:
+    """Find links whose target note does not exist yet. These are NOT errors -
+    in a wiki-style vault you link a thing the moment you mention it, long before
+    (or instead of) writing its note. They are a demand-ranked wishlist of notes
+    worth writing, so they are reported as info, not warnings. Named after
+    MediaWiki's "Wanted pages"."""
     all_stems = {note["stem"].lower(): rel for rel, note in notes.items()}
     # also index stems with em-dashes normalized to regular hyphens so a
     # wikilink written with `-` still matches a filename written with `-`
@@ -295,7 +300,7 @@ def check_broken_links(notes: dict, vault: Path) -> list:
 
     # Operating manuals contain example wikilinks like [[wikilinks]], [[Related Project]],
     # [[Links]] as syntax demonstrations, not as real references. Skip them from the
-    # broken-link scan so they don't generate dozens of false positives per scan.
+    # scan so they don't generate dozens of false positives per scan.
     SKIP_FROM_LINK_SCAN = {"_CLAUDE.md"}
 
     issues = []
@@ -303,7 +308,7 @@ def check_broken_links(notes: dict, vault: Path) -> list:
         if Path(rel).name in SKIP_FROM_LINK_SCAN:
             continue
         # Re-extract links from code-stripped content so example wikilinks inside
-        # code fences / inline code are not flagged as broken (issue #82).
+        # code fences / inline code are not counted (issue #82).
         real_links = [
             link.strip().rstrip("\\")
             for link in LINK_RE.findall(_strip_code(note["content"]))
@@ -323,9 +328,9 @@ def check_broken_links(notes: dict, vault: Path) -> list:
                 potential_folder = vault / link
                 if not potential_folder.is_dir():
                     issues.append({
-                        "type": "broken_link",
-                        "severity": "warning",
-                        "message": f"Broken link [[{link}]] in {rel}",
+                        "type": "wanted_note",
+                        "severity": "info",
+                        "message": f"[[{link}]] - wanted by {rel}",
                         "files": [rel],
                     })
     return issues
@@ -362,7 +367,7 @@ def run_health_check(vault: Path) -> dict:
         ("Code-fence-wrapped notes", check_code_fence_wrapped(notes)),
         ("Missing frontmatter", check_missing_frontmatter(notes)),
         ("Empty folders", check_empty_folders(vault)),
-        ("Broken links", check_broken_links(notes, vault)),
+        ("Wanted notes", check_wanted_notes(notes, vault)),
         ("Template leftovers", check_template_leftovers(notes)),
     ]
 

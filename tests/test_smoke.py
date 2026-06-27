@@ -118,7 +118,7 @@ def test_vault_health_json_reports_clean_linked_vault(tmp_path):
     payload = _json_from_stdout(result.stdout)
     assert payload["total_notes"] == 2
     assert payload["total_issues"] == 0
-    assert payload["counts"]["Broken links"] == 0
+    assert payload["counts"]["Wanted notes"] == 0
     assert payload["counts"]["Orphans"] == 0
 
 
@@ -178,8 +178,8 @@ def test_health_normalizes_dashes_in_links(tmp_path):
         cwd=REPO_ROOT, check=False, capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert '"broken_link"' not in result.stdout, (
-        "hyphen-written link to em-dash filename was flagged broken:\n" + result.stdout
+    assert '"wanted_note"' not in result.stdout, (
+        "hyphen-written link to em-dash filename was counted as a wanted note:\n" + result.stdout
     )
 
 
@@ -231,9 +231,9 @@ def test_health_excludes_export_bundle(tmp_path):
     assert not [i for i in data["issues"] if i["type"] == "duplicate"]
 
 
-def test_health_broken_links_ignore_code_examples(tmp_path):
+def test_health_wanted_notes_ignore_code_examples(tmp_path):
     """Issue #82: example wikilinks inside code fences / inline code must not be
-    flagged broken; a real dangling link in prose still is."""
+    counted; a real link to an unwritten note still is (reported as a wanted note)."""
     (tmp_path / "Doc.md").write_text(
         "---\ntype: note\n---\n# Doc\n\n"
         "Use a link like ```\n[[Related Project]]\n``` or inline `[[Placeholder]]`.\n\n"
@@ -241,9 +241,9 @@ def test_health_broken_links_ignore_code_examples(tmp_path):
         encoding="utf-8",
     )
     data = _run_health_json(tmp_path)
-    broken = [i["message"] for i in data["issues"] if i["type"] == "broken_link"]
-    assert any("Nonexistent Target" in m for m in broken), broken
-    assert not any("Related Project" in m or "Placeholder" in m for m in broken), broken
+    wanted = [i["message"] for i in data["issues"] if i["type"] == "wanted_note"]
+    assert any("Nonexistent Target" in m for m in wanted), wanted
+    assert not any("Related Project" in m or "Placeholder" in m for m in wanted), wanted
 
 
 def _load_vault_ops():
