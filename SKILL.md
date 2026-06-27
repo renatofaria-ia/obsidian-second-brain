@@ -106,7 +106,7 @@ See `references/vault-schema.md` for full structural details.
 ## Core Operating Principles
 
 ### AI-first vault rule (applies to every note)
-The vault is designed for **future-Claude** to read and reason over, not for human review. Every note Claude writes - across all 45 commands - must follow `references/ai-first-rules.md`:
+The vault is designed for **future-Claude** to read and reason over, not for human review. Every note Claude writes - across all 47 commands - must follow `references/ai-first-rules.md`:
 
 1. **Self-contained context** - each note explains itself; don't rely on backlinks alone
 2. **"For future Claude" preamble** - 2-3 sentence summary so Claude can decide relevance in 10 seconds
@@ -567,6 +567,19 @@ Steps:
 
 ---
 
+### `/obsidian-board-hygiene [optional: board name]`
+
+**Bulk-triages a kanban board whose columns have gone stale.** Where `/obsidian-board` only flags overdue items, this clears them.
+
+Steps:
+1. Read `_CLAUDE.md` for the boards folder and kanban convention (columns, `@{date}` format)
+2. Read the target board (fuzzy-match; if none given, list boards and ask), parse every open item, compute age vs today
+3. Group items into overdue (`@{date}` past), stale (older than N days, default 14), and undated; show counts per column so the bloat is visible
+4. Propose ONE verdict per stale/overdue item with a one-line reason - done / reschedule / archive / keep - as a batch the user approves, edits, or overrides
+5. Apply approved verdicts in place (additive moves + strikethrough, never silent deletion), then report what moved and log it
+
+---
+
 ### `/obsidian-project [name]`
 
 **Creates or updates a project note.**
@@ -832,6 +845,14 @@ A multi-persona complement to `/obsidian-challenge` (which red-teams from one st
 **Cross-references everything the vault knows about one topic: agreements, contradictions, stale claims, coverage gaps.**
 
 Topic-driven (unlike `/obsidian-synthesize`, which scans the whole vault unprompted). Pure vault, no network. Greps and reads every note touching the topic, then consolidates into what the vault agrees on, where notes contradict (surfaced, not resolved - that is `/obsidian-reconcile`), what looks stale, and what is missing. Saves a `type: synthesis` note; never modifies the sources.
+
+---
+
+### `/obsidian-distill [note or source]`
+
+**Condenses one source into key claims, each tagged with provenance back to the exact block it came from.** A distillation, not a summary: condensed enough to read fast, anchored enough to audit.
+
+Segments the source into numbered, citable blocks (`B1`, `B2`, ...), extracts the key claims, and tags each claim with the block(s) it came from (`(src: B3)`). A claim with no traceable source does not make the cut - and gets reported as dropped, never silently cut. Inferences the source implies but never states go in a separate labelled section so distilled fact and reasoning never blur. Saves a `type: distillation` note (with the verbatim `source` and the numbered source blocks at the bottom), links it from the original. This is the trust primitive for a vault more than one person reads - the differentiator behind the team-vault direction. Pairs with `/obsidian-ingest` (brings the source in) and `/vault-deep-synthesis` (cross-references many notes).
 
 ---
 

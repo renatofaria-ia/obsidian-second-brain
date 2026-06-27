@@ -274,6 +274,7 @@ Free transcript via youtube-transcript-api. Optional metadata + top comments via
 | `/obsidian-recap` | Summary of a day, week, or month |
 | `/obsidian-review` | Structured weekly or monthly review |
 | `/obsidian-board` | Kanban board view and updates |
+| `/obsidian-board-hygiene` | Bulk-triage a board -- surface stale/overdue items, then archive / reschedule / mark-Done in one pass |
 | `/obsidian-project` | Project note with board and daily links |
 | `/obsidian-projects` | Live project status from git + local docs -- infers all context from vault notes, no config required |
 | `/obsidian-health` | Vault audit -- contradictions, gaps, stale claims, orphans |
@@ -293,6 +294,7 @@ Free transcript via youtube-transcript-api. Optional metadata + top comments via
 | `/obsidian-emerge` | Surfaces patterns from 30 days of notes you never named |
 | `/obsidian-connect [A] [B]` | Bridges two unrelated domains to spark new ideas |
 | `/vault-deep-synthesis [topic]` | Cross-references every note on a topic: agreements, contradictions, stale claims, gaps |
+| `/obsidian-distill [note or source]` | Condenses a long note/source into key claims, each tagged with provenance back to the exact source block |
 | `/idea-discovery` | Ranks 3-5 next-direction candidates from ideas, open questions, and orphan research |
 | `/obsidian-graduate` | Turns an idea fragment into a full project with tasks |
 
