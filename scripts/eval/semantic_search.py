@@ -157,6 +157,8 @@ def _iter_notes(vault: Path):
         parts = md.relative_to(vault).parts
         if SKIP_DIRS & set(parts):
             continue
+        if md.name.endswith(".excalidraw.md"):
+            continue  # drawings are raw JSON, not prose - they bloat and fail embedding
         yield md
 
 

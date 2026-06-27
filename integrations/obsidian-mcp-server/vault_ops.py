@@ -10,9 +10,11 @@ with type/date/tags/ai-first, a `## For future Claude` preamble, and a
 
 from __future__ import annotations
 
+import json
 import math
 import os
 import re
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -52,6 +54,19 @@ _SEARCH_DEWEIGHT_FACTOR = float(os.environ.get("OBSIDIAN_SEARCH_DEWEIGHT", "0.15
 # BM25-style sublinear-TF + length normalization. Env-toggle for A/B (0 = old raw counts).
 _SEARCH_LENGTH_NORM = os.environ.get("OBSIDIAN_SEARCH_LENGTHNORM", "1") != "0"
 
+# Optional semantic (meaning-based) layer. Activates ONLY when a local embedding
+# index exists at the vault root AND a local Ollama model is reachable - so it is
+# opt-in by setup (build the index with scripts/eval/semantic_search.py --build).
+# When present, query results are the Reciprocal-Rank-Fusion of lexical + semantic
+# (measured best all-rounder). Any failure (no index, Ollama down, bad response)
+# silently falls back to pure lexical, so search never breaks or hangs.
+_SEMANTIC_INDEX_FILE = ".obsidian-semantic-index.json"
+_OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").rstrip("/")
+_EMBED_MODEL = os.environ.get("OBSIDIAN_EMBED_MODEL", "mxbai-embed-large")
+_SEMANTIC_ENABLED = os.environ.get("OBSIDIAN_SEARCH_SEMANTIC", "1") != "0"
+_RRF_K = 60
+_FUSE_DEPTH = 25  # how many from each ranking feed the fusion
+
 # Bounds keep search fast and reads safe.
 _MAX_FILES_SCANNED = 2000
 _MAX_FILE_BYTES = 200_000
@@ -70,8 +85,74 @@ def resolve_vault() -> Path:
     return vault
 
 
+def _cosine(a: List[float], b: List[float]) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    return dot / (na * nb) if na and nb else 0.0
+
+
+def _embed_query(text: str) -> Optional[List[float]]:
+    """One fast local-model call for the query. Short timeout, no retries - search
+    must stay snappy; if the model is slow/absent we fall back to lexical."""
+    payload = json.dumps(
+        {"model": _EMBED_MODEL, "prompt": text[:1200], "keep_alive": "15m"}
+    ).encode()
+    req = urllib.request.Request(
+        f"{_OLLAMA_URL}/api/embeddings", data=payload, headers={"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.loads(r.read()).get("embedding")
+
+
+def _semantic_fuse(
+    query: str, lexical: List[Dict[str, Any]], vault: Path, limit: int
+) -> Optional[List[Dict[str, Any]]]:
+    """Fuse lexical results with local semantic ranking via RRF. Returns None (so the
+    caller uses pure lexical) whenever semantic is unavailable or anything fails."""
+    if not _SEMANTIC_ENABLED:
+        return None
+    index_path = vault / _SEMANTIC_INDEX_FILE
+    if not index_path.exists():
+        return None
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        notes = index.get("notes") or {}
+        if not notes:
+            return None
+        qvec = _embed_query(query)
+        if not qvec:
+            return None
+        sem = sorted(
+            ({"path": rel, "title": n.get("title", rel), "score": _cosine(qvec, n["vec"])}
+             for rel, n in notes.items() if n.get("vec")),
+            key=lambda r: r["score"], reverse=True,
+        )[:_FUSE_DEPTH]
+        lex_rank = {r["path"]: i for i, r in enumerate(lexical[:_FUSE_DEPTH])}
+        sem_rank = {r["path"]: i for i, r in enumerate(sem)}
+        snippet = {r["path"]: r.get("snippet", "") for r in lexical}
+        title = {r["path"]: r["title"] for r in lexical}
+        for r in sem:
+            title.setdefault(r["path"], r["title"])
+        fused = []
+        for p in set(lex_rank) | set(sem_rank):
+            s = (1.0 / (_RRF_K + lex_rank[p]) if p in lex_rank else 0.0) \
+                + (1.0 / (_RRF_K + sem_rank[p]) if p in sem_rank else 0.0)
+            fused.append({"path": p, "title": title.get(p, p), "snippet": snippet.get(p, ""), "score": s})
+        fused.sort(key=lambda r: r["score"], reverse=True)
+        out = fused[:limit]
+        for r in out:
+            r.pop("score", None)
+        return out
+    except Exception:
+        return None  # any failure -> pure lexical, never break search
+
+
 def search(query: str, *, limit: int = 6) -> List[Dict[str, Any]]:
-    """Bounded case-insensitive term-frequency search over vault markdown."""
+    """Bounded keyword search over vault markdown, fused with local semantic search
+    when an embedding index + Ollama are available (else pure lexical)."""
     vault = resolve_vault()
     terms = [t for t in re.split(r"\W+", query.lower()) if len(t) > 2 and t not in _STOPWORDS]
     if not terms:
@@ -121,6 +202,9 @@ def search(query: str, *, limit: int = 6) -> List[Dict[str, Any]]:
                 }
             )
     scored.sort(key=lambda r: r["score"], reverse=True)
+    fused = _semantic_fuse(query, scored, vault, limit)
+    if fused is not None:
+        return fused
     for r in scored:
         r.pop("score", None)
     return scored[:limit]

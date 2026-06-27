@@ -373,6 +373,39 @@ def test_semantic_search_math_and_carveout(monkeypatch):
     assert fused[0]["path"] == "both", [f["path"] for f in fused]
 
 
+def test_mcp_vault_ops_hybrid_fusion_and_fallback(tmp_path, monkeypatch):
+    """When a semantic index + reachable model exist, search fuses lexical with
+    semantic (a meaning-only match surfaces). When the model call fails, search
+    silently falls back to pure lexical - it must never break."""
+    import json as _json
+    vault_ops = _load_vault_ops()
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+    monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault))
+    # A note that shares NO query words - only meaning-search could surface it.
+    (vault / "wiki" / "Valencia basis.md").write_text(
+        "---\ntype: note\n---\nBased in Valencia, CET.\n", encoding="utf-8"
+    )
+    (vault / "wiki" / "Other.md").write_text("---\ntype: note\n---\nUnrelated.\n", encoding="utf-8")
+    # Fake index: the Valencia note's vector points the same way as our stub query vector.
+    index = {"model": "test", "notes": {
+        "wiki/Valencia basis.md": {"hash": "x", "title": "Valencia basis", "vec": [1.0, 0.0]},
+        "wiki/Other.md": {"hash": "y", "title": "Other", "vec": [0.0, 1.0]},
+    }}
+    (vault / vault_ops._SEMANTIC_INDEX_FILE).write_text(_json.dumps(index), encoding="utf-8")
+
+    monkeypatch.setattr(vault_ops, "_embed_query", lambda q: [1.0, 0.0])
+    hits = vault_ops.search("where am I based", limit=5)
+    assert any(h["path"] == "wiki/Valencia basis.md" for h in hits), \
+        "semantic match should surface via fusion: " + ", ".join(h["path"] for h in hits)
+
+    # Model unreachable -> fallback to lexical, no exception.
+    def _boom(q):
+        raise RuntimeError("ollama down")
+    monkeypatch.setattr(vault_ops, "_embed_query", _boom)
+    assert vault_ops.search("Valencia", limit=5)  # still returns lexical hits, no crash
+
+
 def test_mcp_vault_ops_read_guards_path_escape(tmp_path, monkeypatch):
     """read_note must refuse paths that escape the vault root."""
     vault_ops = _load_vault_ops()
