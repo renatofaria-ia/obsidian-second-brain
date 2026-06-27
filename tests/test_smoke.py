@@ -317,6 +317,35 @@ def test_mcp_vault_ops_search_ranks_title_over_noise(tmp_path, monkeypatch):
     )
 
 
+def test_link_graph_builds_nodes_edges_and_orphans(tmp_path):
+    """link_graph.py must resolve [[wikilinks]] to real notes, count degree, flag
+    orphans, and report dangling links - the data /obsidian-visualize relies on."""
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+    (vault / "wiki" / "Hub.md").write_text(
+        "---\ntype: project\n---\nLinks to [[Leaf]] and [[Missing Note]].\n", encoding="utf-8"
+    )
+    (vault / "wiki" / "Leaf.md").write_text(
+        "---\ntype: concept\n---\nBack to [[Hub]].\n", encoding="utf-8"
+    )
+    (vault / "wiki" / "Orphan.md").write_text(
+        "---\ntype: note\n---\nNo links here. `[[NotCounted]]` is in code.\n", encoding="utf-8"
+    )
+    out = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts/link_graph.py"), "--path", str(vault)],
+        capture_output=True, text=True, check=True,
+    )
+    graph = json.loads(out.stdout)
+    stats = graph["stats"]
+    assert stats["node_count"] == 3
+    # Hub<->Leaf is one edge each way; the [[Missing Note]] is dangling, not an edge;
+    # the code-fenced [[NotCounted]] must not count.
+    assert stats["edge_count"] == 2
+    assert stats["dangling_link_count"] == 1
+    assert "wiki/Orphan.md" in stats["orphans"]
+    assert graph["stats"]["top_hubs"][0]["title"] in {"Hub", "Leaf"}
+
+
 def test_mcp_vault_ops_read_guards_path_escape(tmp_path, monkeypatch):
     """read_note must refuse paths that escape the vault root."""
     vault_ops = _load_vault_ops()
