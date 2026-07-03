@@ -54,8 +54,8 @@ def load_vault(vault: Path) -> dict:
     notes = {}
     for md in vault.rglob("*.md"):
         parts = md.relative_to(vault).parts
-        # ponytail: also skip any template folder (Templates, 20_Templates, ...) —
-        # its <%...%> Templater syntax is intentional, not a "template leftover" bug.
+        # Also skip any template folder (Templates, 20_Templates, ...): its
+        # <%...%> Templater syntax is intentional, not a "template leftover" bug.
         if any(p in EXCLUDE_DIRS or p.lower().endswith("templates") for p in parts):
             continue
         rel = str(md.relative_to(vault))
