@@ -55,16 +55,17 @@ load only when a skill is selected (progressive disclosure).
 
 ## How to operate
 
-1. Read \`_CLAUDE.md\` in the vault root, if it exists, to learn the user's
-   vault conventions (folder map, daily note format, naming).
+1. Read \`index.md\` in the vault root first, if it exists; it is the canonical
+   OKF bundle entrypoint. If \`_CLAUDE.md\` also exists, treat it as an optional
+   extension file that may refine local conventions.
 2. When the user's request matches a skill, invoke it - by \`\$<skill-name>\`,
    via \`/skills\`, or let Codex select it implicitly from its description.
    You do not need a routing table here; the skill list is the router.
-3. Treat the AI-first vault rule (\`.codex/references/ai-first-rules.md\`) as
-   non-negotiable for every note you write: \`## For future Claude\` preamble,
-   rich frontmatter (\`type\`, \`date\`, \`tags\`, \`ai-first: true\`),
-   \`[[wikilinks]]\` for every person/project/concept, recency markers per
-   external claim, sources verbatim, confidence levels where applicable.
+3. Treat the OKF-first bundle contract (\`index.md\`, \`log.md\`, UTF-8 Markdown,
+   required \`type\`, relative Markdown links) as non-negotiable. If the fork
+   also exposes AI-first extension files, apply them too: \`## For future Claude\`
+   preamble, richer frontmatter, recency markers, sources verbatim, and
+   confidence levels. Obsidian \`[[wikilinks]]\` are compatibility-only.
 4. Do not invent skills. If none matches, ask the user or fall back to plain
    natural-language help.
 
@@ -159,8 +160,8 @@ Then in your vault:
   is selected (progressive disclosure). Invoke a skill with `$<name>`, pick it
   from `/skills`, or just describe the task and let Codex match it.
 - `AGENTS.md` is the always-on operating manual Codex reads at session start
-  (vault conventions + the AI-first rule). It is intentionally thin - the skill
-  list is the router.
+  (OKF-first bundle contract + optional fork extensions). It is intentionally
+  thin - the skill list is the router.
 - `.codex/references/` holds shared specs (the AI-first vault rule) that skills
   reference.
 - `.codex/scripts/` holds the Python helpers invoked by the research toolkit

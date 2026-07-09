@@ -1,18 +1,19 @@
 # Folder Map Resolution
 
-How every command decides **which folder** a note belongs in. Never hardcode a folder name in a command body - resolve it through this spec so the same command works on a wiki-style vault, an Obsidian-style vault, or any custom layout.
+How every command decides **which folder** a note belongs in. Never hardcode a folder name in a command body. Resolve it through this spec so the same command works on an OKF-first bundle, an Obsidian-style vault, or a custom layout.
 
 ## The rule
 
-1. **Read the vault's `_CLAUDE.md` first.** If it has a `## Folder Map` (or `## Naming Conventions`) table, that table is authoritative - use the folder it names for the note type, even if it differs from the defaults below.
-2. **If `_CLAUDE.md` is absent or silent on a type,** fall back to the wiki-style default (column 2). If the vault clearly uses Obsidian-style folders (they exist on disk), use column 3 instead.
-3. **If neither folder exists yet,** create the wiki-style one, unless `_CLAUDE.md` says the vault is Obsidian-style.
-4. **Never invent a third name.** If you cannot resolve a folder, ask the user rather than guessing a new one.
+1. **Read the bundle's `index.md` first.** It is the canonical navigation file and the cheapest way to discover top-level structure.
+2. **If optional root extension files exist, read them next.** In practice, `_CLAUDE.md` may define a `## Folder Map` or `## Naming Conventions` section that overrides the example placements below.
+3. **Inspect the folders and note placements that already exist.** Prefer the folder family the bundle is already using for that note type.
+4. **If the bundle is silent and no equivalent folder exists yet, pick one example layout and stay consistent.** For a fresh AI-first bundle, the wiki-style example remains the default. For a clearly human-first Obsidian bundle, use the matching Obsidian-style example.
+5. **Never invent a new top-level folder when an equivalent resolved location already exists.** If the note type still cannot be resolved, ask the user rather than guessing.
 
-## Note-type to folder
+## Note-type to folder examples
 
-| Note type | Wiki-style default | Obsidian-style alias |
-|-----------|--------------------|----------------------|
+| Note type | Wiki-style example | Obsidian-style example |
+|-----------|--------------------|------------------------|
 | Person / company / tool (entity) | `wiki/entities/` | `People/` |
 | Idea / concept / framework / synthesis | `wiki/concepts/` | `Ideas/` (ideas), `Knowledge/` (reference) |
 | Project | `wiki/projects/` | `Projects/` |
@@ -20,7 +21,7 @@ How every command decides **which folder** a note belongs in. Never hardcode a f
 | Dev / work log | `wiki/logs/` | `Dev Logs/` |
 | Weekly / monthly review | `wiki/reviews/` | `Reviews/` |
 | Standalone task | `wiki/tasks/` | `Tasks/` |
-| Decision record (ADR) | `wiki/decisions/` | `Knowledge/` (as `ADR-YYYY-MM-DD — Title.md`) |
+| Decision record (ADR) | `wiki/decisions/` | `Knowledge/` (as `ADR-YYYY-MM-DD - Title.md`) |
 | Meeting note | `wiki/meetings/` | `Meetings/` |
 | Raw source (immutable) | `raw/` (articles, transcripts, pdfs, videos subfolders) | `raw/` |
 | Research output | `Research/` (Web, Deep, X-pulse, X-reads, YouTube, NotebookLM subfolders) | `Research/` |
@@ -28,6 +29,8 @@ How every command decides **which folder** a note belongs in. Never hardcode a f
 
 ## Notes
 
-- **Ideas vs concepts:** in a wiki-style vault there is no separate `Ideas/` folder - ideas, concepts, frameworks, and synthesis notes all live in `wiki/concepts/`. Only use `Ideas/` if the vault actually has that folder (Obsidian-style). A note tagged `#idea` is found by tag/status, not by folder.
-- **ADRs:** wiki-style keeps decision records in `wiki/decisions/`; Obsidian-style keeps them in `Knowledge/` with an `ADR-` filename prefix. Resolve per `_CLAUDE.md`.
-- **Searching across types:** when a command greps "everywhere" (e.g. synthesis, find), enumerate whatever top-level note folders actually exist in the vault rather than a fixed list - read the vault root once and match the folders present.
+- **Examples, not mandates:** the table above shows common placements, not required folder names.
+- **Ideas vs concepts:** in a wiki-style bundle there is no separate `Ideas/` folder. Ideas, concepts, frameworks, and synthesis notes all live in `wiki/concepts/`. Only use `Ideas/` if the bundle actually has that folder or documents it explicitly.
+- **ADRs:** wiki-style keeps decision records in `wiki/decisions/`; Obsidian-style often keeps them in `Knowledge/` with an `ADR-` filename prefix. Resolve per `index.md`, existing notes, and `_CLAUDE.md` when present.
+- **Searching across types:** when a command scans "everywhere" (for example synthesis or find), enumerate the note folders that actually exist in the bundle instead of assuming a fixed top-level layout.
+- **Root files:** `index.md` and `log.md` are reserved names, not note-type folders.

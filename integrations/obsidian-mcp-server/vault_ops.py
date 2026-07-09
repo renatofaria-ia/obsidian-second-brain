@@ -13,10 +13,11 @@ from __future__ import annotations
 import json
 import math
 import os
+import posixpath
 import re
 import urllib.request
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Optional
 
 _VAULT_ENV = "OBSIDIAN_VAULT_PATH"
@@ -277,7 +278,7 @@ def save_note(
         f"{content}\n"
     )
     path.write_text(body, encoding="utf-8")
-    return {"saved": str(path.relative_to(vault))}
+    return {"saved": path.relative_to(vault).as_posix()}
 
 
 def capture_idea(text: str, *, tags: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -338,11 +339,12 @@ def update_note(
 
 
 def validate_note(rel: str) -> Dict[str, Any]:
-    """Check a note against the AI-first rule and for unresolved wikilinks.
+    """Check a note against the AI-first rule and for unresolved internal note links.
 
     Returns {path, ok, issues}. Issues cover missing frontmatter, missing
     required keys (type/date/tags/ai-first), a missing `## For future Claude`
-    preamble, and `[[wikilinks]]` whose target note does not exist in the vault.
+    preamble, and unresolved internal links in either `[[wikilink]]` or
+    relative Markdown-link form.
     """
     vault = resolve_vault()
     rel = (rel or "").strip()
@@ -365,22 +367,30 @@ def validate_note(rel: str) -> Dict[str, Any]:
             issues.append(f"missing frontmatter key: {key}")
     if "## For future Claude" not in text:
         issues.append("missing '## For future Claude' preamble")
+
     index = _stem_index(vault)
+    files = _file_index(vault)
     seen = set()
-    for link in _wikilinks(text):
-        norm = _norm_link(link)
+    for ref in _note_links(text, rel):
+        norm = ref["norm"]
+        resolved = ref.get("resolved")
+        if ref["kind"] == "markdown" and resolved and resolved in files:
+            continue
         if norm and norm not in index and norm not in seen:
             seen.add(norm)
-            issues.append(f"unresolved wikilink: [[{link}]]")
+            if ref["kind"] == "markdown":
+                issues.append(f"unresolved markdown link: [{ref['title']}]({ref['raw']})")
+            else:
+                issues.append(f"unresolved wikilink: [[{ref['raw']}]]")
     return {"path": rel, "ok": not issues, "issues": issues}
 
 
 def backlinks(target: str) -> Dict[str, Any]:
-    """Find every note that links to `target` via [[wikilink]].
+    """Find every note that links to `target` via internal note links.
 
     `target` may be a note title/stem or a vault-relative path; both resolve to
-    the note's stem for matching (aliases `[[Note|alias]]` and folder-qualified
-    links `[[folder/Note]]` are handled).
+    the note's stem for matching. Supports both `[[wikilink]]` and relative
+    Markdown-link forms.
     """
     vault = resolve_vault()
     key = (target or "").strip()
@@ -391,10 +401,10 @@ def backlinks(target: str) -> Dict[str, Any]:
     for i, md in enumerate(_iter_notes(vault)):
         if i >= _MAX_FILES_SCANNED:
             break
+        rel = md.relative_to(vault).as_posix()
         text = _read_safe(md, limit=_MAX_FILE_BYTES) or ""
-        if any(_norm_link(link) == stem for link in _wikilinks(text)):
-            rel = str(md.relative_to(vault))
-            if md.stem.lower() != stem:  # don't list the note itself
+        if any(ref["norm"] == stem for ref in _note_links(text, rel)):
+            if md.stem.lower() != stem:
                 refs.append(rel)
     return {"target": stem, "count": len(refs), "backlinks": sorted(refs)}
 
@@ -403,12 +413,13 @@ def vault_health() -> Dict[str, Any]:
     """Bounded structural health summary of the vault.
 
     Reports counts plus capped samples of orphan notes (no inbound or outbound
-    links), wanted notes (a link exists but the target note does not - a
-    wishlist, not an error), and notes with no frontmatter. Bounded by the same
-    file cap as search so it stays fast.
+    note links), wanted notes (a note link exists but the target note does not -
+    a wishlist, not an error), and notes with no frontmatter. Supports both
+    `[[wikilinks]]` and relative Markdown links to `.md` files.
     """
     vault = resolve_vault()
     index = _stem_index(vault)
+    files = _file_index(vault)
     note_paths: Dict[str, str] = {}
     missing_fm: List[str] = []
     wanted: List[Dict[str, str]] = []
@@ -419,20 +430,25 @@ def vault_health() -> Dict[str, Any]:
         if i >= _MAX_FILES_SCANNED:
             break
         count += 1
-        rel = str(md.relative_to(vault))
+        rel = md.relative_to(vault).as_posix()
         note_paths[md.stem.lower()] = rel
         text = _read_safe(md, limit=_MAX_FILE_BYTES) or ""
         if not text.lstrip().startswith("---"):
             if len(missing_fm) < 10:
                 missing_fm.append(rel)
-        links = _wikilinks(text)
-        if links:
+        refs = _note_links(text, rel)
+        if refs:
             has_outbound.add(md.stem.lower())
-        for link in links:
-            norm = _norm_link(link)
-            linked_to.add(norm)
-            if norm and norm not in index and len(wanted) < 10:
-                wanted.append({"in": rel, "link": link})
+        for ref in refs:
+            norm = ref["norm"]
+            if norm:
+                linked_to.add(norm)
+            resolved = ref.get("resolved")
+            if ref["kind"] == "markdown" and resolved:
+                if resolved not in files and len(wanted) < 10:
+                    wanted.append({"in": rel, "link": f"[{ref['title']}]({ref['raw']})"})
+            elif norm and norm not in index and len(wanted) < 10:
+                wanted.append({"in": rel, "link": ref["raw"]})
     orphans = [p for s, p in note_paths.items() if s not in linked_to and s not in has_outbound]
     return {
         "notes_scanned": count,
@@ -574,6 +590,14 @@ def _slug(text: str) -> str:
 
 
 _WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)")
+_MD_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+_CODE_FENCE_BLOCK_RE = re.compile(r"```.*?```", re.DOTALL)
+_INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
+_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+
+
+def _strip_code(text: str) -> str:
+    return _INLINE_CODE_RE.sub("", _CODE_FENCE_BLOCK_RE.sub("", text))
 
 
 def _wikilinks(text: str) -> List[str]:
@@ -581,9 +605,41 @@ def _wikilinks(text: str) -> List[str]:
     return [m.group(1).strip() for m in _WIKILINK_RE.finditer(text)]
 
 
+def _markdown_note_links(text: str, source_rel: str = "") -> List[Dict[str, Any]]:
+    refs: List[Dict[str, Any]] = []
+    base = PurePosixPath(source_rel).parent if source_rel else PurePosixPath(".")
+    for raw in _MD_LINK_RE.findall(text):
+        href = raw.strip().strip("<>").split("#", 1)[0].replace("\\", "/")
+        if not href or href.startswith("#") or _SCHEME_RE.match(href):
+            continue
+        pure = PurePosixPath(href)
+        if pure.suffix.lower() != ".md":
+            continue
+        resolved = posixpath.normpath(str(base / pure))
+        refs.append(
+            {
+                "kind": "markdown",
+                "raw": raw.strip(),
+                "title": pure.stem,
+                "resolved": resolved,
+                "norm": _norm_link(PurePosixPath(resolved).stem),
+            }
+        )
+    return refs
+
+
+def _note_links(text: str, source_rel: str = "") -> List[Dict[str, Any]]:
+    stripped = _strip_code(text)
+    refs: List[Dict[str, Any]] = []
+    for link in _wikilinks(stripped):
+        refs.append({"kind": "wiki", "raw": link, "title": link.split("/")[-1], "resolved": None, "norm": _norm_link(link)})
+    refs.extend(_markdown_note_links(stripped, source_rel))
+    return refs
+
+
 def _norm_link(link: str) -> str:
-    """Normalize a wikilink target to a comparable note stem (basename, lowercased)."""
-    return link.split("/")[-1].strip().lower()
+    """Normalize a note-link target to a comparable note stem (basename, lowercased)."""
+    return Path(link).stem.strip().lower()
 
 
 def _stem_index(vault: Path) -> Dict[str, str]:
@@ -592,8 +648,17 @@ def _stem_index(vault: Path) -> Dict[str, str]:
     for i, md in enumerate(_iter_notes(vault)):
         if i >= _MAX_FILES_SCANNED:
             break
-        idx[md.stem.lower()] = str(md.relative_to(vault))
+        idx[md.stem.lower()] = md.relative_to(vault).as_posix()
     return idx
+
+
+def _file_index(vault: Path) -> set[str]:
+    out: set[str] = set()
+    for i, md in enumerate(_iter_notes(vault)):
+        if i >= _MAX_FILES_SCANNED:
+            break
+        out.add(md.relative_to(vault).as_posix())
+    return out
 
 
 def _split_frontmatter(text: str):

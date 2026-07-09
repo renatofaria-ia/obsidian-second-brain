@@ -10,7 +10,7 @@ Optional argument: a specific project name. If given, show deep context for that
 
 ## Step 1 - discover projects
 
-Read `_CLAUDE.md` to find the projects folder name, resolved per `references/folder-map.md` (wiki-style `wiki/projects/`, Obsidian-style `Projects/`). If not defined, default to the wiki-style `wiki/projects/`.
+Read `index.md` first if it exists at the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine the projects folder name. Resolve the folder per `references/folder-map.md` (wiki-style `wiki/projects/`, Obsidian-style `Projects/`). If not defined, default to the wiki-style `wiki/projects/`.
 
 Scan that folder for all `.md` files. For each file, read its frontmatter. A note is a tracked project if it has `type: project` OR lives in the projects folder and has a `repo:` field. Collect:
 
@@ -56,7 +56,7 @@ Print the full overview in the conversation immediately. Order: active first, th
 ## [Project Name]
 Status: active | stalled | idle | blocked | archived
 Repo: path/to/repo  (or "no repo")
-Vault: [[Projects/Project Name]]
+Vault: project note reference
 
 Last session: YYYY-MM-DD - one sentence on what was done (source: git / vault / docs)
 Next action: specific next step, or "unclear - check vault note"
@@ -82,4 +82,4 @@ If a project note doesn't exist yet but was discoverable via git (e.g. the repo 
 
 ---
 
-**AI-first rule:** Every vault write MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter, `[[wikilinks]]` for every project referenced, recency markers on git-sourced facts (e.g. `(as of 2026-05-21, git log)`), sources noted inline.
+**AI-first rule:** Every vault write MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter, relative Markdown links as the canonical internal format (preserving `[[wikilinks]]` only when the surrounding bundle is still Obsidian-native), recency markers on git-sourced facts (e.g. `(as of 2026-05-21, git log)`), and sources noted inline.

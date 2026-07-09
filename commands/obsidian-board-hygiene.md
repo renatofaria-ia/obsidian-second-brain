@@ -8,7 +8,7 @@ Use the obsidian-second-brain skill. Execute `/obsidian-board-hygiene [board]`:
 
 The board's "This Week" column has quietly become a graveyard - this clears it. The board equivalent of the wanted-notes triage: surface what's stale, then keep / reschedule / done / archive in one guided pass.
 
-1. Read `_CLAUDE.md` first if it exists in the vault root, to find the boards folder and kanban convention (columns, priority markers, `@{date}` format).
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions, to find the boards folder and kanban convention (columns, priority markers, `@{date}` format).
 2. Read the target board (fuzzy-match the argument; if none given, list boards and ask). Parse every open item per column, extract its `@{date}` if present, and compute age vs today.
 3. Group the open items by staleness: **overdue** (`@{date}` in the past), **stale** (in the same column with a date older than N days, default 14), and **undated** (no `@{date}` - can't be scheduled, flag separately). Show counts per column so the bloat is visible at a glance.
 4. For each stale/overdue item, propose ONE verdict with a one-line reason: **done** (looks completed elsewhere - move to Done with strikethrough), **reschedule** (still real - set a new `@{date}` or move to Backlog/Next Week), **archive** (dead - move to an `_archived` section or Done with a "dropped" note), or **keep** (genuinely active, leave it). Present as a batch the user can approve, edit, or override - never auto-move destructively without confirmation.
@@ -18,4 +18,4 @@ A board only means something if "This Week" means this week. Run this whenever a
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.

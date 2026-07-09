@@ -11,8 +11,8 @@ A focused, topic-driven cross-reference of the existing vault. Unlike `/obsidian
 1. Resolve the topic from the argument. If none, ask what to synthesize.
 2. Find every note that references the topic - grep and list exhaustively across whatever top-level note folders the vault actually has (read the vault root once; typically `wiki/`, `Research/`, and any project/concept folders named in `_CLAUDE.md` per `references/folder-map.md` - do not assume a fixed list, do not sample; see the anti-fabrication rule). Match by every plausible name, alias, and folder.
 3. Read the matching notes and cross-reference them into:
-   - **What the vault agrees on** - claims multiple notes corroborate, with `[[wikilinks]]` to each.
-   - **Contradictions** - where notes disagree; name both `[[notes]]` and the specific conflict. Do not resolve them here (that is `/obsidian-reconcile`); just surface them.
+   - **What the vault agrees on** - claims multiple notes corroborate, with note references to each.
+   - **Contradictions** - where notes disagree; name both notes and the specific conflict. Do not resolve them here (that is `/obsidian-reconcile`); just surface them.
    - **Stale claims** - dated facts that may no longer hold (cite the note and the date).
    - **Coverage gaps** - questions the topic raises that the vault does not answer.
 4. Write the synthesis to `wiki/concepts/YYYY-MM-DD - synthesis - <topic-slug>.md` (`type: synthesis`, tagged `[research, thinking, vault-deep-synthesis]`), listing the source notes it read in frontmatter.
@@ -20,6 +20,6 @@ A focused, topic-driven cross-reference of the existing vault. Unlike `/obsidian
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Enumerate the matching notes exhaustively, do not sample - a partial scan reported as complete produces confident wrong answers. Never invent a claim, contradiction, or source; if the vault is thin on the topic, say so. See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

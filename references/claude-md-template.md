@@ -1,74 +1,62 @@
 # `_CLAUDE.md` Template
 
-`_CLAUDE.md` is a file that lives at the root of your vault.
-It is the first thing Claude reads when working in your vault.
-It gives every Claude surface (Desktop, Code, VS Code, terminal) the same operating context - no memory required.
+`_CLAUDE.md` is an optional runtime extension file that lives at the root of a bundle.
+Claude should read `index.md` first, then `_CLAUDE.md` when it exists.
+Use this file to persist local operating rules across Claude surfaces without confusing them with the core OKF contract.
 
 ---
 
 ## How to Generate It
 
-When a user asks Claude to create their `_CLAUDE.md`, Claude should:
-1. Glob the vault (`<vault>/**/*.md`) to map the structure
-2. Read `Home.md` (or equivalent dashboard) if it exists
-3. Read 2-3 templates from the `Templates/` folder
-4. Read the current kanban boards
-5. Fill in the template below with discovered values
-6. Write the file to `_CLAUDE.md` at the vault root (Write tool, or `obsidian_save_note` if using the bundled MCP server)
+When a user asks Claude to create or refresh `_CLAUDE.md`, Claude should:
+1. Read `index.md` first.
+2. Glob the bundle root (`<vault>/**/*.md`) to map the structure.
+3. Read `Home.md` or another dashboard note if one exists.
+4. Read 2-3 templates from `Templates/` if that folder exists.
+5. Read the current kanban boards if the bundle uses them.
+6. Fill in the template below with discovered values.
+7. Write the file to `_CLAUDE.md` at the bundle root.
 
 ---
 
 ## The Template
 
-Copy this, fill in the bracketed values, and save as `_CLAUDE.md` in the vault root.
+Copy this, fill in the bracketed values, and save as `_CLAUDE.md` at the bundle root.
 
 ```markdown
-# Claude Operating Manual — [Your Name]'s Vault
+# Claude Operating Manual - [Your Name]'s Bundle
 
-> Read this file before doing anything in this vault.
-> This is the single source of truth for how Claude operates here.
-
----
-
-## Section 0 — AI-First Vault Rule (read first, applies to every note)
-
-This vault is designed for **future-Claude** to read and reason over, not for human review. The owner rarely reads notes directly — they call Claude to retrieve, synthesize, and connect dots across years of accumulated knowledge.
-
-**Every note Claude writes to this vault must follow these rules:**
-
-1. **Self-contained context** — Each note must explain itself. Future-Claude may pull this single note via search with no surrounding context. Don't rely on backlinks alone for meaning.
-2. **"For future Claude" preamble** — Every note begins with a 2-3 sentence summary in plain English so Claude can decide relevance in 10 seconds before parsing the structured data.
-3. **Rich, consistent frontmatter** — Filterable metadata (`type`, `date`, `topic`, `tags`, `related-people`, `related-projects`, `sources`, `confidence`). Different note types may have different schemas, but every note has machine-readable frontmatter.
-4. **Recency markers per claim** — When stating external facts, attach the date: "Mem0 raised $24M (as of 2026-04)" so future-Claude knows what to verify before trusting.
-5. **Sources preserved verbatim** — Every external claim has its source URL inline so it can be re-verified or refreshed.
-6. **Cross-links are mandatory** — Every person, project, idea, decision, or concept referenced uses `[[wikilinks]]` so the graph is traversable.
-7. **Confidence levels** — Where applicable, mark claims as `stated | high | medium | speculation` so future-Claude knows what to trust vs verify.
-
-This rule applies to all `/obsidian-*` and `/research*` commands, all scheduled agents, and any direct vault writes.
+> Read `index.md` first, then this file.
+> This file is the single source of truth for local runtime behavior, not for bundle validity.
 
 ---
 
-## Section 0.5 — Verify Live State Before Acting
-
-Before declaring a bug, drafting a fix, or writing architecture: read the actual code, schema, deployed branch, env, or live data. Speculation from stale context burns hours and produces drafts that contradict reality.
-
-Specific cues:
-- Read the schema or types before declaring a bug (real field names live in the code, not in memory)
-- `git fetch origin` and read the deployed branch, not local `main`
-- Grep the live file before any anchor-based patch
-- Fetch live time, dates, and rates (never infer from training data)
-- Verify env vars in the running process before blaming code
-- Mock tests miss schema drift: read one real payload before declaring "done"
-
-This is a general operating principle, not vault-specific. Keep it in `_CLAUDE.md` so every Claude session in this vault inherits it.
-
----
-
-## Vault Identity
+## Bundle Identity
 
 - **Owner:** [Full Name]
-- **Primary purpose:** [e.g. "Life OS — work, personal, side business, finances"]
+- **Primary purpose:** [e.g. "Life OS - work, personal, side business, finances"]
+- **Storage mode:** [e.g. "Obsidian-backed bundle" or "plain Markdown bundle"]
 - **Last updated:** [YYYY-MM-DD]
+
+---
+
+## Core Contract Reminder
+
+The persisted contract is OKF-first:
+- `index.md` is the canonical entrypoint
+- `log.md` is the canonical reserved log file
+- persisted notes use UTF-8 Markdown with YAML frontmatter
+- `type` is required in concept frontmatter
+- relative Markdown links are canonical
+
+This file is an extension layer. It may refine local folder choices, naming conventions, and auto-save rules, but it does not replace `index.md` or `log.md`.
+
+---
+
+## AI-First Extension
+
+Notes written or refreshed under this bundle should follow `references/ai-first-rules.md`.
+If this bundle uses exceptions, document them here explicitly.
 
 ---
 
@@ -76,106 +64,85 @@ This is a general operating principle, not vault-specific. Keep it in `_CLAUDE.m
 
 | Folder | Purpose |
 |---|---|
-| `Daily/` | One note per day. Named `YYYY-MM-DD.md` |
-| `Projects/` | Active and archived projects |
-| `Tasks/` | Standalone task notes (linked from boards) |
-| `Boards/` | Kanban boards: [list your board names] |
-| `People/` | One note per person |
-| `Dev Logs/` | Technical work logs — dated, project-tagged |
-| `Side Biz/` | [Remove if not applicable] Deals, dashboard, tasks |
-| `Side Biz/Deals/` | Deal notes — one per client opportunity |
-| `Knowledge/` | Reference material and permanent notes |
-| `Learning/` | Books, courses, content consumed |
-| `Content/` | Content calendar and post drafts |
-| `Finances/` | Monthly finance notes and subscriptions |
-| `Goals/` | Annual and life goals |
-| `Mentions/` | Times I've been recognized or mentioned |
-| `Jobs/` | Employment and contract roles |
-| `Businesses/` | Companies I own (founder stake) |
-| `Templates/` | Note templates (Templater) |
+| `[resolved daily area]` | Daily notes if this bundle uses them |
+| `[resolved projects area]` | Active and archived projects |
+| `[resolved people area]` | One note per person or entity |
+| `[resolved tasks area]` | Standalone task notes if used |
+| `[resolved boards area]` | Kanban boards if used |
+| `[resolved knowledge/concepts area]` | Concepts, references, synthesis notes |
+| `[resolved dev-log area]` | Technical or work session logs |
+| `[resolved review area]` | Weekly or monthly reviews |
+| `[resolved meetings area]` | Meeting notes |
+| `Templates/` | Note templates, if present |
+
+State only the folders that actually exist or are intended to exist in this bundle.
 
 ---
 
 ## Key Files
 
-- **Dashboard:** `[[Home]]` — main navigation and dataview queries
-- **Work Board:** `[[Boards/[Work Board Name]]]`
-- **Personal Board:** `[[Boards/Personal]]`
-- **Mentions Log:** `[[Mentions/Mentions Log]]`
-- **People Index:** `People/` folder
+- **Dashboard or home note:** [path or note link]
+- **Primary board:** [path or note link]
+- **People index:** [path or note link]
+- **Any protected/private area:** [path]
 
 ---
 
 ## Active Context
 
-> Update this section at the start of each major project or focus period.
-
-**Current top priority:** [Your current top priority here]
-**Current job:** [Company] — [Your Role]
-**Manager:** [Name]
-**Key colleagues:** [Name (role), Name (role), ...]
+- **Current top priority:** [text]
+- **Current role or mode:** [text]
+- **Key collaborators:** [names and roles]
+- **Important constraints:** [text]
 
 ---
 
 ## Auto-Save Rules
 
 Claude should auto-save the following **without asking**:
-- Decisions made in conversation → relevant project note + daily note
-- New people mentioned → People/ (create stub if needed)
-- Tasks assigned or committed to → kanban board + Tasks/ note
-- Dev work done → Dev Logs/ + project note + daily note
-- Mentions/recognition from colleagues → Mentions Log + person's note
-- Completed tasks → move on kanban to ✅ Done
+- Decisions made in conversation
+- New people or entities mentioned when clearly relevant
+- Tasks assigned or committed to
+- Work logs or execution summaries
 
 Claude should **ask before saving**:
-- Anything touching Finances/ or personal financial data
-- Faith/ or Partner/ (private notes)
-- Anything that involves deleting or archiving an existing note
+- Financial data
+- Health, family, faith, or other sensitive private material
+- Anything that deletes, renames, or archives existing notes
 
 ---
 
 ## Naming Conventions
 
 - Daily notes: `YYYY-MM-DD.md`
-- Dev logs: `YYYY-MM-DD — Description.md`
-- Deals: `Client Name - Description Month Year.md`
-- Tasks: Descriptive title, no date prefix
-- People: Full name (e.g. `Jane Smith.md`, not `Jane.md`)
+- Dev logs: `YYYY-MM-DD - Description.md`
+- ADRs: `ADR-YYYY-MM-DD - Title.md`
+- People: full name
 - Archive prefix: `_archived_`
+
+Override only what this bundle actually uses.
 
 ---
 
 ## Frontmatter Requirements
 
-Every note must have at minimum:
+Every persisted note should satisfy the bundle contract and any local additions documented here. At minimum:
+
 ```yaml
 ---
 date: YYYY-MM-DD
+type: [note-type]
 tags:
   - [note-type]
 ---
 ```
 
-Note types: `daily` | `project` | `task` | `person` | `devlog` | `deal` | `goal` | `mention` | `content`
-
 ---
 
 ## Kanban Convention
 
-Columns in boards: `📥 Backlog` · `📋 This Week` · `🔨 In Progress` · `⏳ Waiting On` · `✅ Done`
-
-Priority: 🔴 critical · 🟡 important · 🟢 low
-
-Item format:
-```
-- [ ] 🔴 **Title** · @{YYYY-MM-DD}
-	Description. [[Related Project]] [[Person]]
-```
-
-Completed:
-```
-- [x] ~~🔴 **Title**~~ ✅ Date
-```
+If the bundle uses kanban boards, document the actual columns, priority convention, and item format here.
+If it does not use kanban, delete this section.
 
 ---
 
@@ -183,56 +150,34 @@ Completed:
 
 | Event | Also update |
 |---|---|
-| New project | Board (Backlog) + today's daily note |
-| Task done | Board (Done, strikethrough) + project note + daily note |
-| Dev session | Dev Logs/ + project note (Recent Activity) + daily note |
-| Person interaction | Daily note + their People/ note |
-| Decision made | Project note (Key Decisions) + daily note |
-| Mention/recognition | Mentions Log + person's note + daily note |
-| Deal update | Deal file + Side Biz board + daily note |
+| New project | related board + daily note if those exist |
+| Task done | task status + project note + daily note |
+| Dev session | dev log + project note + daily note |
+| Person interaction | daily note + person note |
+| Decision made | project note + daily note |
 
----
-
-## People to Know
-
-> Add the people most relevant to your work here so Claude doesn't have to discover them.
-
-| Person | Role | Notes |
-|---|---|---|
-| [Name] | [Role] | [One-line context] |
-| [Name] | [Role] | [One-line context] |
-
----
-
-## Projects Currently Active
-
-> Keep this list current. Claude uses it to route context correctly.
-
-- `[[Projects/Project Name]]` — [one-line status]
-- `[[Projects/Project Name]]` — [one-line status]
+Only list the propagation paths this bundle actually uses.
 
 ---
 
 ## Do Not Touch
 
-- `Templates/` — Never modify templates during normal vault operations
-- `Faith/` — Private. Read only if directly asked.
-- `[Other private folders]` — [Reason]
+- `Templates/` - do not modify templates during normal operations
+- `[private folders]` - [reason]
+- `[generated files]` - [reason]
 
 ---
 
-*This file was generated by the obsidian-second-brain skill.*
-*Regenerate with: "Claude, update my _CLAUDE.md"*
+*This file is a local runtime extension for the bundle.*
+*Regenerate with: "Update my _CLAUDE.md"*
 ```
 
 ---
 
 ## Keeping `_CLAUDE.md` Fresh
 
-`_CLAUDE.md` should be regenerated or updated when:
-- A new major project starts
-- A team change happens (new manager, new colleagues)
-- A folder is restructured
-- Active priorities shift significantly
-
-The user can trigger this with: *"Update my `_CLAUDE.md`"* or *"Regenerate my vault manifest."*
+Refresh `_CLAUDE.md` when:
+- a new major project starts
+- the folder structure changes
+- active priorities shift significantly
+- the bundle adopts new extensions or conventions

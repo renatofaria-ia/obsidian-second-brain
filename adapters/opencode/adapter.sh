@@ -34,16 +34,17 @@ agent) should follow when the user's request matches its trigger phrase.
 
 ## How to operate
 
-1. Read `_CLAUDE.md` in the vault root, if it exists, to learn the user's
-   vault conventions.
+1. Read `index.md` in the vault root first, if it exists; it is the canonical
+   OKF bundle entrypoint. If `_CLAUDE.md` also exists, treat it as an optional
+   extension file for local workflow rules.
 2. When the user's request matches a trigger in the tables below, read the
    matching file under `.opencode/commands/<name>.md` and follow its
    instructions step by step.
-3. Treat the AI-first vault rule (`references/ai-first-rules.md`) as
-   non-negotiable for every note you write: `## For future Claude` preamble,
-   rich frontmatter (`type`, `date`, `tags`, `ai-first: true`), `[[wikilinks]]`
-   for every person/project/concept, recency markers per external claim,
-   sources verbatim, confidence levels where applicable.
+3. Treat the OKF-first bundle contract (`index.md`, `log.md`, UTF-8 Markdown,
+   required `type`, relative Markdown links) as non-negotiable. If the fork
+   also exposes AI-first extension files, apply them too: `## For future Claude`
+   preamble, richer frontmatter, recency markers, sources verbatim, and
+   confidence levels. Obsidian `[[wikilinks]]` are compatibility-only.
 
 ## Command routing tables (grouped by category)
 EOF

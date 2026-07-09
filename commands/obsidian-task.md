@@ -6,7 +6,7 @@ triggers_en: ["add task", "new todo", "track this", "remind me"]
 
 Use the obsidian-second-brain skill. Execute `/obsidian-task $ARGUMENTS`:
 
-1. Read `_CLAUDE.md` first if it exists in the vault root
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions
 2. Parse the task from the argument, or pull from recent conversation context if no argument given
 3. Infer: priority (🔴/🟡/🟢), due date, linked project, linked person
 4. Search for the right kanban board - use `_CLAUDE.md` board list or search `Boards/`
@@ -16,6 +16,6 @@ Use the obsidian-second-brain skill. Execute `/obsidian-task $ARGUMENTS`:
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Search exhaustively before claiming any note, person, or file is absent - false absence is the most common failure mode - and never invent facts, entities, or dates (mark unknowns as `TBD`). See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

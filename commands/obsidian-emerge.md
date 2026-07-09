@@ -8,7 +8,7 @@ Use the obsidian-second-brain skill. Execute `/obsidian-emerge $ARGUMENTS`:
 
 The optional argument is a timeframe (e.g., "2 weeks", "this month"). Default: last 30 days.
 
-1. Read `_CLAUDE.md` first if it exists in the vault root
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions
 2. Determine the date range from the argument (default: last 30 days)
 3. Spawn parallel subagents to read vault content from the period:
    - **Daily notes agent**: read all daily notes in the date range, extract recurring topics, complaints, observations, and energy patterns
@@ -28,6 +28,6 @@ The goal is insight the user cannot see themselves. Do not restate what they alr
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Search exhaustively before claiming any note, person, or file is absent - false absence is the most common failure mode - and never invent facts, entities, or dates (mark unknowns as `TBD`). See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

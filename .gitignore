@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 *.pyo
 .python-version
+.pytest-tmp/
 
 # Local config (never commit)
 .env

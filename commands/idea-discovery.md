@@ -13,12 +13,12 @@ Answers "what is worth doing next" from material already in the vault. Distinct 
    - Open questions in active project notes (Open Questions sections, unresolved decisions).
    - Orphan research notes in `Research/` that no project links to.
 2. Rank the candidates by a simple, stated heuristic: recency (touched recently), pull (how many notes reference or depend on it), and momentum (does anything already build toward it). State the heuristic in the output so the ranking is auditable.
-3. For each of the top 3-5, write: the candidate, why now, the `[[source notes]]`, and the smallest next step that would move it forward.
+3. For each of the top 3-5, write: the candidate, why now, the supporting note references, and the smallest next step that would move it forward.
 4. Optionally suggest running `/research [topic]` on a candidate to pull external signal before committing, or `/obsidian-graduate` to promote one into a full project.
 5. Save the shortlist to `Ideas/YYYY-MM-DD - discovery.md` (`type: synthesis`, tagged `[thinking, idea-discovery]`) with source links in frontmatter. Do NOT auto-graduate anything - this command only surfaces and ranks.
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Rank only real candidates found in the vault - never invent an idea, an open question, or a research note to pad the shortlist. Enumerate the ideas folder, project Open Questions, and orphan research exhaustively rather than sampling. See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

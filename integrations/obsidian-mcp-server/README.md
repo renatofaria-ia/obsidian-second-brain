@@ -24,8 +24,8 @@ Curator tools (guarded mutation + graph + health, per Issue #79):
 | Tool | What it does |
 |---|---|
 | `obsidian_update_note(path, append, heading, set_fields)` | Guarded edit of an existing note: append a section and/or merge scalar frontmatter; preserves the rest verbatim, never creates, never touches `tags:` blocks, stamps `updated` |
-| `obsidian_validate_note(path)` | Check a note for AI-first compliance (frontmatter keys, `## For future Claude` preamble) and unresolved `[[wikilinks]]` |
-| `obsidian_backlinks(target)` | List every note that links to `target` via `[[wikilink]]` |
+| `obsidian_validate_note(path)` | Check a note for AI-first compliance (frontmatter keys, `## For future Claude` preamble) and unresolved internal note links (`[[wikilinks]]` or relative Markdown links) |
+| `obsidian_backlinks(target)` | List every note that links to `target` via internal note links |
 | `obsidian_vault_health()` | Bounded structural summary: orphans, wanted notes (linked but unwritten - a wishlist, not errors), notes missing frontmatter (counts + capped samples) |
 
 Skill tools (the higher-level behaviors, per Issue #60 - "use the skills, not just file search"):

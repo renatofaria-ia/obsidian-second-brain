@@ -17,6 +17,16 @@ obsidian-second-brain is a cross-CLI **skill** (not a plugin, not a hosted servi
 - MIT licensed.
 
 The AI-first vault rule ties it all together: every note a command writes is designed for future-Claude retrieval, not human reading. The canonical spec is `references/ai-first-rules.md`, referenced from `_CLAUDE.md` Section 0 and from every command that writes to the vault.
+## Fork direction: OKF alignment
+
+This fork is standardizing the persisted knowledge layer on **OKF 0.1** while preserving the current command names during the first migration phase.
+
+- docs/ofk/gap-analysis.md defines the current mismatches between upstream behavior and OKF.
+- docs/ofk/canonical-bundle.md defines the target bundle contract for this fork.
+- docs/ofk/command-matrix.md classifies all 44 commands into OKF-core, OKF + extension, or Obsidian-only.
+- docs/ofk/test-scenarios.md defines the acceptance scenarios for the migration.
+
+The migration is already underway beyond phase-0 documentation: `/obsidian-save`, `/obsidian-find`, `/obsidian-ingest`, `/obsidian-init`, and `/obsidian-export` have started moving toward the OKF contract, the bootstrap now emits canonical root `index.md` and `log.md`, and the export/tooling path already handles OKF-first bundles.
 
 ---
 
@@ -121,7 +131,7 @@ Every command that writes to a vault must follow `references/ai-first-rules.md`.
 
 - A `## For future Claude` preamble at the top of every note.
 - Rich frontmatter: `type`, `date`, `tags`, `ai-first: true`, plus type-specific fields.
-- `[[wikilinks]]` for every person, project, idea, decision, and concept referenced.
+- Relative Markdown links as the canonical internal format for every person, project, idea, decision, and concept referenced; `[[wikilinks]]` only as a compatibility extension when the surrounding bundle still relies on them.
 - External claims carry recency markers like `(as of 2026-04, source.com)` with the source URL inline.
 - Confidence levels (`stated | high | medium | speculation`) where applicable.
 - Anti-fabrication and search-completeness are hard rules: never invent facts, never claim absence without an exhaustive search, mark unknowns as `TBD`.

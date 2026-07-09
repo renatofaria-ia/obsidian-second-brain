@@ -8,7 +8,7 @@ Use the obsidian-second-brain skill. Execute `/obsidian-graduate $ARGUMENTS`:
 
 The optional argument is the idea title, tag, or keyword. If not provided, scan recent notes for ideas tagged `#idea` or in the ideas folder (resolved per `references/folder-map.md`) and present them for selection.
 
-1. Read `_CLAUDE.md` first if it exists in the vault root. Resolve the ideas folder and projects folder per `references/folder-map.md` (wiki-style: ideas in `wiki/concepts/`, projects in `wiki/projects/`; Obsidian-style: `Ideas/`, `Projects/`).
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions. Resolve the ideas folder and projects folder per `references/folder-map.md` (wiki-style: ideas in `wiki/concepts/`, projects in `wiki/projects/`; Obsidian-style: `Ideas/`, `Projects/`).
 2. Find the idea to graduate:
    - If argument given: search the ideas folder, daily notes, and captures for a matching idea (fuzzy match)
    - If no argument: list recent ideas (last 14 days) and ask the user to pick one
@@ -38,6 +38,6 @@ The idea doesn't die - it evolves. The original note stays as the origin story, 
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Search exhaustively before claiming any note, person, or file is absent - false absence is the most common failure mode - and never invent facts, entities, or dates (mark unknowns as `TBD`). See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

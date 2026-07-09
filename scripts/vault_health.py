@@ -20,11 +20,12 @@ Usage:
 import argparse
 import difflib
 import json
+import posixpath
 import re
 import sys
 from collections import defaultdict
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 TODAY = date.today()
 EXCLUDE_DIRS = {".obsidian", ".trash", "_trash", ".git", ".claude", "_export", "Templates"}
@@ -36,6 +37,8 @@ FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 # in the fence (double corruption). The correct fix is to UNWRAP, not to add.
 CODE_FENCE_WRAP_RE = re.compile(r"\A\s*```[^\n]*\n\s*---\s*\n")
 LINK_RE = re.compile(r"\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]")
+MD_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 DATE_RE = re.compile(r"due:\s*(\d{4}-\d{2}-\d{2})")
 TEMPLATE_RE = re.compile(r"<%.*?%>")
 ALIAS_RE = re.compile(r"^aliases:\s*\n((?:\s+-\s+.+\n?)+)", re.MULTILINE)
@@ -69,22 +72,48 @@ def index_vault_files(vault: Path) -> set:
     return files
 
 
+def _iter_note_link_refs(text: str, rel: str = "") -> list[dict]:
+    stripped = _strip_code(text)
+    refs = []
+    for link in LINK_RE.findall(stripped):
+        raw = link.strip().rstrip("\\")
+        refs.append({
+            "kind": "wiki",
+            "raw": raw,
+            "display": f"[[{raw}]]",
+            "resolved": None,
+            "norm": raw.split("/")[-1].lower().removesuffix(".md"),
+        })
+    base = PurePosixPath(rel).parent if rel else PurePosixPath(".")
+    for raw in MD_LINK_RE.findall(stripped):
+        href = raw.strip().strip("<>").split("#", 1)[0].replace("\\", "/")
+        if not href or href.startswith("#") or SCHEME_RE.match(href):
+            continue
+        pure = PurePosixPath(href)
+        if pure.suffix.lower() != ".md":
+            continue
+        resolved = posixpath.normpath(str(base / pure))
+        refs.append({
+            "kind": "markdown",
+            "raw": raw.strip(),
+            "display": f"[{pure.stem}]({raw.strip()})",
+            "resolved": resolved.lower(),
+            "norm": PurePosixPath(resolved).stem.lower(),
+        })
+    return refs
+
+
 def load_vault(vault: Path) -> dict:
     notes = {}
     for md in vault.rglob("*.md"):
         parts = md.relative_to(vault).parts
-        # Also skip any template folder (Templates, 20_Templates, ...): its
-        # <%...%> Templater syntax is intentional, not a "template leftover" bug.
         if any(p in EXCLUDE_DIRS or p.lower().endswith("templates") for p in parts):
             continue
         rel = str(md.relative_to(vault))
         content = md.read_text(encoding="utf-8", errors="replace")
         fm_match = FRONTMATTER_RE.match(content)
         frontmatter = fm_match.group(1) if fm_match else ""
-        # Strip fenced/inline code before extracting links so shell snippets like
-        # `[[ -z "$VAR" ]]` are not stored as wikilinks. These links feed the orphan
-        # check (all_links); leaving code noise in masks real orphans (issue #93).
-        links = [l.strip().rstrip("\\") for l in LINK_RE.findall(_strip_code(content))]
+        links = _iter_note_link_refs(content, Path(rel).as_posix())
         due_match = DATE_RE.search(frontmatter)
         notes[rel] = {
             "path": md,
@@ -159,19 +188,11 @@ def check_orphans(notes: dict) -> list:
     all_links = set()
     for note in notes.values():
         for link in note["links"]:
-            lk = link.lower()
-            # An incoming link may carry the .md extension ([[note.md]]); it still
-            # targets the same note, so strip it before matching against stems.
-            if lk.endswith(".md"):
-                lk = lk[:-3]
+            lk = link["norm"]
+            if not lk:
+                continue
             all_links.add(lk)
             all_links.add(lk.replace(" ", "-"))
-
-    # also treat aliases as resolvable targets
-    alias_set = set()
-    for note in notes.values():
-        for alias in note["aliases"]:
-            alias_set.add(alias.lower())
 
     issues = []
     skip_folders = {"Daily", "Dev Logs", "Boards", "Templates", "Life Chapters",
@@ -181,7 +202,7 @@ def check_orphans(notes: dict) -> list:
         top_folder = rel.split("/")[0] if "/" in rel else ""
         if top_folder in skip_folders:
             continue
-        if rel in ("Home.md", "_CLAUDE.md"):
+        if rel in ("Home.md", "_CLAUDE.md", "index.md", "log.md"):
             continue
         stem_lower = note["stem"].lower()
         stem_norm = stem_lower.replace("-", " ").replace("_", " ")
@@ -310,47 +331,36 @@ def _normalize_dashes(s: str) -> str:
 
 
 def check_wanted_notes(notes: dict, vault: Path) -> list:
-    """Find links whose target note does not exist yet. These are NOT errors -
-    in a wiki-style vault you link a thing the moment you mention it, long before
-    (or instead of) writing its note. They are a demand-ranked wishlist of notes
-    worth writing, so they are reported as info, not warnings. Named after
-    MediaWiki's "Wanted pages"."""
+    """Find note links whose target note does not exist yet. Supports both
+    `[[wikilinks]]` and relative Markdown links to `.md` files."""
     all_stems = {note["stem"].lower(): rel for rel, note in notes.items()}
-    # Full-file index so links to non-markdown assets and links written with an
-    # explicit extension resolve instead of being flagged broken.
     all_files = index_vault_files(vault)
-    # also index stems with em-dashes normalized to regular hyphens so a
-    # wikilink written with `-` still matches a filename written with `-`
     all_stems_dash_norm = {
         _normalize_dashes(note["stem"]).lower(): rel for rel, note in notes.items()
     }
-    # build alias → rel lookup so [[Full Name]] resolves if the note has that alias
     all_aliases: dict[str, str] = {}
     for rel, note in notes.items():
         for alias in note["aliases"]:
             all_aliases[alias.lower()] = rel
 
-    # Operating manuals contain example wikilinks like [[wikilinks]], [[Related Project]],
-    # [[Links]] as syntax demonstrations, not as real references. Skip them from the
-    # scan so they don't generate dozens of false positives per scan.
     SKIP_FROM_LINK_SCAN = {"_CLAUDE.md"}
 
     issues = []
     for rel, note in notes.items():
         if Path(rel).name in SKIP_FROM_LINK_SCAN:
             continue
-        # Re-extract links from code-stripped content so example wikilinks inside
-        # code fences / inline code are not counted (issue #82).
-        real_links = [
-            link.strip().rstrip("\\")
-            for link in LINK_RE.findall(_strip_code(note["content"]))
-        ]
-        for link in real_links:
-            # Wikilink targets carry no extension; Path.stem treats everything after
-            # the last dot as a suffix and truncates titles like "release v2.4 notes"
-            # -> "release v2", so path-form links to dotted titles never resolve
-            # (issue #93). Take the last path component verbatim, stripping only a
-            # literal .md if present.
+        for ref in note["links"]:
+            if ref["kind"] == "markdown":
+                if ref["resolved"] not in all_files:
+                    issues.append({
+                        "type": "wanted_note",
+                        "severity": "info",
+                        "message": f"{ref['display']} - wanted by {rel}",
+                        "files": [rel],
+                    })
+                continue
+
+            link = ref["raw"]
             link_name = link.rsplit("/", 1)[-1]
             if link_name.lower().endswith(".md"):
                 link_name = link_name[:-3]

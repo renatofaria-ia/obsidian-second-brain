@@ -10,7 +10,7 @@ You cannot improve retrieval you have not measured. This scores the vault's REAL
 
 The optional argument is a number of cases to (re)generate first (e.g. `30`), or `report` to also write the result to the vault. No argument: evaluate the existing cases.
 
-1. Read `_CLAUDE.md` first if it exists in the vault root.
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions.
 
 2. If the user asked to generate (or no cases file exists yet at `scripts/eval/retrieval_cases.jsonl`), bootstrap the eval set from the vault:
    ```bash
@@ -34,6 +34,6 @@ Measure, change one thing, measure again. That loop - not a guess about vector d
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Report the eval numbers exactly as the harness emits them - never round a miss into a hit or invent a recall figure. If the cases are few or the gold labels look weak, say so rather than overclaiming. See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

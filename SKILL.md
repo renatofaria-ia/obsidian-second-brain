@@ -1,28 +1,23 @@
 ---
 name: obsidian-second-brain
 description: >
-  Operate any Obsidian vault as a living, self-rewriting second brain (an evolution
-  of Karpathy's LLM Wiki pattern: sources rewrite existing pages, contradictions
-  reconcile automatically, scheduled agents maintain the vault while you sleep).
-  Use this skill whenever
-  the user asks Claude to read, write, update, search, or manage their Obsidian
-  vault - including saving notes from conversation, creating daily entries, updating
-  kanban boards, logging dev work, managing people notes, capturing decisions,
-  tracking deals, or maintaining any vault structure. Also triggers when the user
-  wants to bootstrap a new vault from scratch, run a vault health check, or drop
-  a _CLAUDE.md into their vault so all Claude surfaces share the same operating rules.
-  Includes a research toolkit (7 commands: /x-read, /x-pulse, /research, /research-deep,
-  /notebooklm, /youtube, /podcast) for AI-powered research via Grok, Perplexity, NotebookLM,
-  YouTube, and podcast feeds - findings save
-  to the vault automatically following the AI-first vault rule. Use proactively whenever
-  the conversation produces information worth preserving (decisions, people met, projects
-  started, tasks completed, lessons learned, research findings).
+  Operate an OKF-first knowledge bundle, including Obsidian-backed bundles,
+  as a living second brain. Use this skill whenever the user asks Claude to
+  read, write, update, search, export, or bootstrap a bundle whose canonical
+  persistence contract is Open Knowledge Format (OKF) 0.1. Treat `index.md`
+  and `log.md` as reserved root files, require UTF-8 Markdown with YAML
+  frontmatter and mandatory `type`, and treat `_CLAUDE.md`, `CRITICAL_FACTS.md`,
+  AI-first rules, bi-temporal timelines, scheduled agents, and Obsidian
+  `[[wikilinks]]` as explicit fork extensions rather than core format
+  requirements. Use proactively whenever the conversation produces information
+  worth preserving (decisions, people met, projects started, tasks completed,
+  lessons learned, research findings).
 ---
 
 # Obsidian Second Brain
 
-> Claude operates your Obsidian vault as a self-rewriting knowledge base. An evolution of [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f): sources rewrite existing pages instead of just appending, contradictions reconcile automatically, and scheduled agents maintain the vault while you sleep.
-> Everything worth remembering gets saved. Every update propagates everywhere it belongs.
+> Claude operates an OKF-first knowledge bundle that may be stored in an Obsidian vault. The core persisted contract is `index.md` + `log.md` + typed UTF-8 Markdown documents.
+> AI-first rules, runtime files such as `_CLAUDE.md`, and Obsidian-native conventions remain explicit fork extensions layered on top of that base contract.
 
 ---
 
@@ -33,27 +28,29 @@ description: >
 Try these methods in order. Use the first one available:
 
 **Method 0 - SessionStart hook (if configured):**
-If `hooks/load_vault_context.py` is wired as a SessionStart hook in `~/.claude/settings.json`, `_CLAUDE.md` is injected into context automatically at session start. Skip step 1 below.
+If `hooks/load_vault_context.py` is wired as a SessionStart hook in `~/.claude/settings.json`, `index.md` and any root extension files are injected into context automatically at session start. Skip step 1 below.
 To wire it: `bash scripts/setup.sh "/path/to/vault"` or run `/obsidian-setup`.
 
 **Method A - Direct filesystem (default, always works):**
-Use standard file tools (Read, Write, Edit, Glob) against the vault path. The vault is plain markdown, so every operation in this skill works this way with no setup. This is the normal path in Claude Code - the commands below use these tools directly.
+Use standard file tools against the vault path. The vault is plain markdown, so every operation in this skill works this way with no setup. This is the normal path in Claude Code - the commands below use these tools directly.
 
 **Method B - MCP server (optional, mainly for non-Claude-Code clients):**
 This repo ships its own MCP server at `integrations/obsidian-mcp-server/` that exposes the vault as tools (`obsidian_search`, `obsidian_read_note`, `obsidian_save_note`, `obsidian_capture`, plus curator tools). It exists so other MCP clients - Hermes Agent, Claude Desktop, Cursor - can use the vault as a knowledge layer; in Claude Code itself, Method A is simpler and preferred. If those `obsidian_*` tools happen to be available in your client, you may use them instead of raw file tools. Setup lives in `integrations/obsidian-mcp-server/README.md` (it is `uv run --with mcp python .../server.py` with `OBSIDIAN_VAULT_PATH` set, not an `npx` package).
 
-### 1. First time in a vault → read `_CLAUDE.md`
+### 1. First time in a bundle -> read `index.md`, then extension files
 
-Before doing anything in a vault, check if `_CLAUDE.md` exists at the vault root and read it:
+Before doing anything in a vault, check whether `index.md` exists at the bundle root and read it first:
 
 ```
-Read <vault>/_CLAUDE.md
+Read <vault>/index.md
 ```
 
-If it exists: follow its rules exactly - they override the defaults in this skill. Where `_CLAUDE.md` is silent, fall back to the defaults below.
-If it doesn't exist: use the defaults in this skill, then offer to create one.
+If it exists: treat it as the bundle front door and the primary navigation surface.
+If `_CLAUDE.md` exists: read it next as an extension file that may refine local conventions, folder names, frontmatter details, or auto-save behavior.
+If `index.md` does not exist but `_CLAUDE.md` does: read `_CLAUDE.md` as a transitional extension file and treat the vault as a legacy pre-OKF bundle.
+If neither exists: use the defaults in this skill, then offer to create the canonical root files with `/obsidian-init`.
 
-If the SessionStart hook is active, `_CLAUDE.md` is already in context - skip this step.
+If the SessionStart hook is active, `index.md` and any extension files may already be in context - skip this step.
 
 ### 2. First time with a new user → run discovery
 
@@ -91,7 +88,7 @@ Then just point the skill at the new vault path (Method A above). If you use the
 - **`creator`** - Content calendar, ideas pipeline, audience notes, publishing. Kanban: Ideas, Drafts, Published.
 - **`researcher`** - Sources, literature notes, hypotheses, methodology. Kanban: Reading, Processing, Synthesized.
 
-Default (no preset) gives a general-purpose vault. All presets use wiki-style by default.
+Default (no preset) gives a general-purpose vault. All presets preserve the same OKF core contract and add one default folder layout.
 
 **Assistant mode** creates a `_CLAUDE.md` configured for operating a vault on behalf of someone else. See `references/claude-md-assistant-template.md`.
 
@@ -99,20 +96,41 @@ See `references/vault-schema.md` for full structural details.
 
 ---
 
+## Core Bundle Contract
+
+Before applying any local workflow rules, anchor on the bundle contract:
+
+1. Read `index.md` first when it exists at the bundle root. It is the canonical entrypoint.
+2. Treat `log.md` as the canonical root operations log, even when the bundle also uses split per-day logs as an extension.
+3. Persist knowledge as UTF-8 Markdown with YAML frontmatter and mandatory `type`.
+4. Reserve `index.md` and `log.md`; never treat them as concept documents.
+5. Use relative Markdown links as the canonical internal link format.
+6. Treat `_CLAUDE.md`, `CRITICAL_FACTS.md`, AI-first rules, bi-temporal facts, kanban structures, and `[[wikilinks]]` as extension behavior layered on the base contract.
+
+### Path resolution rule
+When command examples below mention concrete folders such as `wiki/`, `raw/`, `Daily/`, `Boards/`, `Projects/`, `People/`, `Knowledge/`, `Research/`, or `Logs/`, treat those paths as defaults or legacy layouts, not as part of the core OKF contract. Resolve actual write targets in this order:
+
+1. `index.md` and the bundle's existing relative links
+2. root extension files such as `_CLAUDE.md` or `CRITICAL_FACTS.md` when present
+3. existing note placement patterns already used in the bundle
+4. skill defaults only when the bundle is silent
+
+Never invent a new top-level folder when the bundle already contains an equivalent location for the same note type.
+
 ## Core Operating Principles
 
-### AI-first vault rule (applies to every note)
-The vault is designed for **future-Claude** to read and reason over, not for human review. Every note Claude writes - across all 44 commands - must follow `references/ai-first-rules.md`:
+### AI-first extension rule (applies to fork-managed notes)
+AI-first is an explicit fork extension layered on top of the OKF base contract. It is the default writing mode for notes this skill creates or refreshes, but it is not itself the definition of bundle validity. When this extension is active, every note Claude writes should follow `references/ai-first-rules.md`:
 
 1. **Self-contained context** - each note explains itself; don't rely on backlinks alone
 2. **"For future Claude" preamble** - 2-3 sentence summary so Claude can decide relevance in 10 seconds
 3. **Rich, consistent frontmatter** - `type`, `date`, `tags`, `ai-first: true`, plus type-specific fields (see `ai-first-rules.md` for schemas per note type)
 4. **Recency markers per claim** - "Mem0 raised $24M (as of 2026-04, mem0.ai)" so future-Claude knows what to verify
 5. **Sources preserved verbatim** - every external claim has its source URL inline
-6. **Cross-links mandatory** - every person/project/idea/decision uses `[[wikilinks]]`
+6. **Cross-links mandatory** - every person, project, idea, decision, or concept uses an internal note link; relative Markdown links are canonical, and `[[wikilinks]]` are compatibility-only for Obsidian-native bundles
 7. **Confidence levels** - `stated | high | medium | speculation` where applicable
 
-This rule lives in `_CLAUDE.md` Section 0 of every vault using this skill, and in `references/ai-first-rules.md` (the canonical specification with frontmatter schemas + preamble templates per note type).
+This extension is defined canonically in `references/ai-first-rules.md` (frontmatter schemas + preamble templates per note type). `index.md` remains the canonical bundle entrypoint; `_CLAUDE.md` may restate or refine local conventions as an optional extension file.
 
 ### Never create in isolation
 Every write operation must ask: *where else does this belong?*
@@ -130,7 +148,7 @@ Every write operation must ask: *where else does this belong?*
 | A specific reusable number or stat | `social-media/data-points.md` (if folder exists) |
 | An external post that performed well + why | `social-media/swipe-file.md` (if folder exists) |
 | Research findings worth keeping | `social-media/research/YYYY-MM-DD — topic.md` (if folder exists) |
-| Any vault write | operation log (`Logs/YYYY-MM-DD.md` if `Logs/` exists, else `log.md`), `index.md` (update if new note created) |
+| Any bundle write | operation log (`Logs/YYYY-MM-DD.md` if `Logs/` exists, else `log.md`), `index.md` (update if new note created) |
 
 Always propagate. Never create a single orphaned note.
 
@@ -159,45 +177,47 @@ This enables:
 - Smart reconciliation (different facts at different times = not a contradiction)
 - Full audit trail (when did the vault learn each fact, from what source?)
 
-### CRITICAL_FACTS.md - always loaded
-A tiny file (~120 tokens) loaded alongside `SOUL.md` at L0 in every session. Contains facts needed in every conversation:
+### CRITICAL_FACTS.md - optional runtime extension
+`CRITICAL_FACTS.md` is not part of the core OKF contract. When present, treat it as a small runtime extension file that can hold facts needed in nearly every conversation, such as:
 - Timezone
 - Current manager
 - Current location
 - Current company and role
-- Any other fact that's true RIGHT NOW and relevant to every interaction
+- Any other fact that is true RIGHT NOW and relevant to most interactions
 
-Update this file whenever a critical fact changes. Keep it under 150 tokens.
+If the file exists, read it after `index.md` and `_CLAUDE.md`. If it does not exist, the bundle is still valid and complete without it.
 
 ### Raw is immutable
-In wiki-style vaults, the `raw/` folder contains original sources (articles, transcripts, PDFs). Claude reads these but NEVER modifies them. They are the source of truth. If a wiki page gets corrupted, re-derive it from the raw source. When ingesting, always save the original to `raw/` and the derived pages to `wiki/`.
+When a bundle uses a `raw/` folder, treat it as an immutable source area for original materials (articles, transcripts, PDFs). Claude may read these files but should never modify them. If a derived note gets corrupted, re-derive it from the source material. When ingesting, save originals to the bundle's source area (`raw/` if present) and save derived notes to the resolved concept area for that bundle.
 
 ### Maintain `index.md` and `log.md`
-Two structural files that keep the vault navigable and auditable:
+Two structural files keep the bundle navigable and auditable:
 
-- **`index.md`** - A catalog of all vault pages organized by category. Claude reads this FIRST when navigating the vault instead of searching - faster and cheaper on tokens. Update it whenever a new note is created or deleted. Format: `- [[Note Name]] — brief description` grouped under folder headings.
+- **`index.md`** - the canonical bundle entrypoint. Claude should read this FIRST when navigating an OKF-first bundle instead of starting from search. Update it whenever a new concept or directory becomes part of the persisted bundle. Format: relative Markdown links grouped by section, for example `- [Project Alpha](./projects/project-alpha.md) - brief description`.
 
-- **`log.md`** - An append-only chronological log of every vault operation. Every save, ingest, health check, and structural change gets a timestamped entry. Never delete or rewrite entries - only append. Format: `## [YYYY-MM-DD] action | Description`
+- **`log.md`** - the canonical root operations log. It stays append-only from the perspective of bundle history. In modernized vaults the root file may point to split daily logs under `Logs/`, but the root contract still keeps `log.md` reserved and present.
 
-### Per-day operation logs (modernized vaults)
-Vaults initialized with `/obsidian-init` (v0.9+) use a split log structure instead of a monolithic `log.md`:
+`_CLAUDE.md`, `CRITICAL_FACTS.md`, `SOUL.md`, and similar files can coexist as extensions, but they do not replace `index.md` and `log.md` in the bundle contract.
+
+### Per-day operation logs (modernized bundles)
+Bundles initialized with `/obsidian-init` (v0.9+) use a split log structure instead of a monolithic `log.md`:
 
 - **`Logs/YYYY-MM-DD.md`** - one file per day, append-only. Format: `**HH:MM** - action | description`
-- **`log.md` at vault root** - pointer file only. Never write entries here; it explains the per-day structure and ships the entry template.
+- **`log.md` at bundle root** - pointer file only. Never write entries here; it explains the per-day structure and ships the entry template.
 
 To migrate an existing monolithic `log.md`: run `python scripts/migrate_log.py --vault <path>`.
 To refresh the stats block in `index.md` after bulk writes: run `python scripts/vault_stats.py --vault <path>`.
 
-When writing operation log entries, check whether the vault uses the old (`log.md`) or new (`Logs/YYYY-MM-DD.md`) structure and write to the correct location.
+When writing operation log entries, check whether the bundle uses the old (`log.md`) or new (`Logs/YYYY-MM-DD.md`) structure and write to the correct location.
 
-### The vault is a living system
-The vault is not a filing cabinet. It is a living knowledge base that rewrites itself with every input. When new information enters:
+### The bundle is a living system
+The bundle is not a filing cabinet. It is a living knowledge base that rewrites itself with every input. When new information enters:
 - Existing pages get REWRITTEN with new context, not just appended to
 - Contradictions between old and new claims get resolved or explicitly documented
 - New patterns across multiple sources trigger automatic synthesis pages
 - Stale claims get replaced with current information, with history preserved
 
-The vault after an ingest should be DIFFERENT - not just bigger. If pages that existed before aren't smarter, more connected, and more current, the ingest wasn't deep enough.
+The bundle after an ingest should be DIFFERENT - not just bigger. If pages that existed before are not smarter, more connected, and more current, the ingest was not deep enough.
 
 ### Two-Output Rule
 Every interaction that produces insight must generate two outputs:
@@ -207,7 +227,7 @@ Every interaction that produces insight must generate two outputs:
 This applies to all thinking tools and any query where Claude synthesizes information from the vault.
 
 ### Synthesis Hook
-When Claude notices a pattern during any operation (ingest, query, challenge, emerge), it should automatically create a synthesis page in `wiki/concepts/`. Patterns include:
+When Claude notices a pattern during any operation (ingest, query, challenge, emerge), it should automatically create a synthesis page in the resolved concepts area (for example `wiki/concepts/` in legacy wiki-style bundles). Patterns include:
 - The same concept appearing in 3+ unrelated sources
 - A claim being reinforced by multiple independent sources
 - A trend emerging across time-sequenced notes
@@ -249,15 +269,16 @@ Match: frontmatter schema, heading style, list formatting, tone, emoji usage (or
 Never introduce new conventions - extend what's already there.
 
 ### Frontmatter is mandatory
-Every note gets frontmatter. At minimum:
+Every persisted concept note gets YAML frontmatter. At minimum:
 ```yaml
 ---
+type: concept
 date: 2026-03-24
 tags:
-  - <note-type>
+  - concept
 ---
 ```
-See `references/vault-schema.md` for full frontmatter specs by note type.
+Root `index.md` also carries `okf_version: "0.1"`. Reserve `index.md` and `log.md` for the root contract and never use them as concept filenames. See `references/vault-schema.md` for full frontmatter specs by note type.
 
 ---
 
@@ -265,41 +286,41 @@ See `references/vault-schema.md` for full frontmatter specs by note type.
 
 See `references/write-rules.md` for the complete guide. Summary:
 
-- **Links**: Use `[[Note Name]]` for internal links. Always link to people, projects, and jobs mentioned in a note.
+- **Links**: Use relative Markdown links as the canonical internal format. Preserve `[[wikilinks]]` only when the surrounding bundle is still Obsidian-native.
 - **Dates**: ISO format (`YYYY-MM-DD`) in frontmatter. Human format (`March 24`) in body text.
-- **Naming**: `YYYY-MM-DD — Title.md` for dated notes. `Title.md` for evergreen notes. No special characters except `—` (em dash).
+- **Naming**: `YYYY-MM-DD - Title.md` for dated notes. `Title.md` for evergreen notes. Reserve `index.md` and `log.md`.
 - **Status values**: `active` / `planning` / `completed` / `archived` / `on-hold` for projects. `in-progress` / `done` / `waiting` for tasks.
-- **Kanban**: Items follow the format `- [ ] 🔴 **Title** · @{YYYY-MM-DD}\n\tDescription [[Link]]`
+- **Kanban**: Items may still use Obsidian-friendly notation inside extension folders, but persisted concept links should remain readable as standard Markdown where practical.
 
 ---
 
 ## The `_CLAUDE.md` File
 
-This is the most important concept in this skill.
+`_CLAUDE.md` is an extension file, not part of the core OKF bundle contract.
 
-`_CLAUDE.md` lives at the vault root and persists Claude's operating rules across every session and every surface (Claude Desktop, Claude Code, VS Code, terminal). Without it, Claude has to re-learn your vault conventions every conversation.
+When it exists at the bundle root, it can persist local operating rules across sessions and surfaces (Claude Desktop, Claude Code, VS Code, terminal). Typical uses:
+- folder-map refinements
+- frontmatter details beyond the base OKF contract
+- local auto-save behavior
+- privacy or workflow rules specific to one vault
 
-**Precedence rule:** `_CLAUDE.md` wins on all vault-specific rules (folder names, naming conventions, frontmatter fields, auto-save behavior, private folders). The defaults in this skill file apply only where `_CLAUDE.md` is silent. Never let skill defaults override an explicit `_CLAUDE.md` rule.
+**Precedence rule:** for bundle validity and navigation, `index.md` and `log.md` define the core contract. For local runtime behavior, `_CLAUDE.md` may refine those defaults without becoming a required part of the persisted knowledge format.
 
-**What it contains:**
-- Your vault's folder map and what each folder is for
-- Frontmatter schemas for your specific note types
-- Naming conventions you use
-- What to auto-save vs. what to ask first
-- People and projects that need special handling
-- Links to key files (boards, dashboard, templates)
+**What it usually contains:**
+- local folder map and what each folder is for
+- additional frontmatter conventions for the fork
+- naming conventions beyond the core contract
+- what to auto-save vs. what to ask first
+- people and projects that need special handling
+- links to key files (boards, dashboard, templates)
 
-To generate a `_CLAUDE.md` for an existing vault, run vault discovery then use the template in `references/claude-md-template.md`.
-
-To install it: write the file to the vault root. Every Claude session that starts in that vault should read it first.
-
----
+To generate a `_CLAUDE.md` for an existing vault, run vault discovery and use the template in `references/claude-md-template.md`.
 
 ## Common Operations
 
 ### Save info from conversation
-When a conversation produces something vault-worthy:
-1. Identify the note type (decision → project note, person met → People/, task → board + Tasks/, etc.)
+When a conversation produces something worth persisting in the bundle:
+1. Identify the note type (decision -> project or decision note, person met -> resolved people area, task -> board + resolved tasks area, etc.)
 2. Check if a relevant note already exists
 3. Write or update - always frontmatter-first
 4. Propagate to boards, daily note, linked notes
@@ -307,20 +328,21 @@ When a conversation produces something vault-worthy:
 ### Create today's daily note
 ```
 date = today in YYYY-MM-DD format
-path = Daily/{date}.md
+path = <resolved daily notes area>/{date}.md
 ```
 Read `Templates/Daily Note.md`, fill in the date fields, create the file.
 Then scan recent conversation for anything worth logging in today's sections.
 
 ### Log a dev session
 Read `Templates/Dev Log.md`. Fill: date, project name, what was worked on, problems solved, decisions made, next steps.
-Save to `Dev Logs/YYYY-MM-DD — Project Name.md`.
+Save to the resolved dev logs area using a dated project filename such as `YYYY-MM-DD - Project Name.md`.
 Link from project note's Recent Activity section and today's daily note.
 
 ### Update a kanban board
 Boards use the `kanban-plugin: board` frontmatter.
 Columns are `## Column Name` headers.
-Items are `- [ ] **Title** · @{due-date}\n\tDescription [[Links]]`
+Items are `- [ ] **Title** @{due-date}
+	Description [Related note](../path/to/note.md)`; preserve `[[wikilinks]]` only when the surrounding board is explicitly Obsidian-native.
 Completed items move to the `## ✅ Done` column with a strikethrough: `- [x] ~~**Title**~~ ✅ Date`
 
 ### Run vault health check
@@ -353,7 +375,7 @@ Steps:
    - **Projects agent**: search for each project, create or update notes
    - **Tasks agent**: parse tasks, add to the right kanban columns
    - **Decisions agent**: find relevant project notes, append to Key Decisions sections
-   - **Ideas agent**: search Ideas/ for related notes, create or append
+   - **Ideas agent**: search the resolved ideas or incubation area for related notes, create or append
 4. After all agents complete: update today's daily note with links to everything saved
 5. Report back: a clean list of what was saved and where
 
@@ -366,7 +388,7 @@ Do not ask for guidance on where to save things - infer it. Only ask if somethin
 **Creates or updates today's daily note.**
 
 Steps:
-1. Check if `Daily/YYYY-MM-DD.md` exists for today
+1. Check whether today's daily note already exists in the resolved daily notes area
 2. If not: read `Templates/Daily Note.md`, fill in date fields, create the file
 3. Scan the current conversation for anything relevant to today: tasks in progress, people mentioned, decisions made, what's being worked on
 4. Pre-fill or update the note's sections with that context
@@ -380,9 +402,9 @@ Return the path of the daily note when done.
 
 **One calendar command with four modes.** Claude Code only (needs the Google Calendar MCP). The first word selects the mode; a bare range word defaults to `agenda`; no argument at all defaults to `agenda today`.
 
-- **`agenda [range]`** - reads the calendar and writes a re-derivable AI-first snapshot to `wiki/agenda/` (`type: agenda-snapshot`). Range: `today`, `tomorrow`, `week`, `next-week`, a date, or a range. Cross-links attendees to `[[Person]]` notes; flags conflicts, 3+ back-to-back stretches, working-hours focus blocks, and externally-organized events. Read-only on the calendar; Google Calendar stays the source of truth.
+- **`agenda [range]`** - reads the calendar and writes a re-derivable AI-first snapshot to the resolved agenda area (for example `wiki/agenda/` in legacy wiki-style bundles) with `type: agenda-snapshot`. Range: `today`, `tomorrow`, `week`, `next-week`, a date, or a range. Cross-links attendees to person notes using the bundle's canonical internal link format; flags conflicts, 3+ back-to-back stretches, working-hours focus blocks, and externally-organized events. Read-only on the calendar; Google Calendar stays the source of truth.
 - **`reconcile [window]`** - flags commitments the vault implies (project `next_action`s, due tasks, dated commitments in daily notes, fixed dates in `CRITICAL_FACTS.md`) that are NOT on the calendar, plus events with no vault context. Flag only - never adds or changes events.
-- **`meeting [selector]`** - turns an event (`last`, `next`, `today`, `event-id:<id>`, or fuzzy title) into a `type: meeting` note in `wiki/meetings/` with metadata pre-filled and **empty** Notes / Decisions / Action items sections (never fabricate meeting content). Cross-links attendees, backlinks any task whose `calendar-event-id` matches.
+- **`meeting [selector]`** - turns an event (`last`, `next`, `today`, `event-id:<id>`, or fuzzy title) into a `type: meeting` note in the resolved meetings area (for example `wiki/meetings/` in legacy wiki-style bundles) with metadata pre-filled and **empty** Notes / Decisions / Action items sections (never fabricate meeting content). Cross-links attendees and backlinks any task whose `calendar-event-id` matches.
 - **`schedule <args>`** - the only mode that writes to the calendar. Standalone (`"<title>" <when> <duration>`), from a task (`task:<path>`), or suggest-a-time (`task:<...> suggest:<window>`). Resolves attendee emails from person notes (never guesses), conflict-checks before writing, requests a Meet link when participants span domains, and writes `calendar-event-id` back into the task so a re-run reschedules rather than duplicating.
 
 (Consolidated from the former `/obsidian-agenda`, `/obsidian-reconcile`-style calendar check, `/obsidian-meeting`, and `/obsidian-schedule` - same behaviors, one entry point. The natural-language triggers for all four still route here.)
@@ -418,7 +440,7 @@ Steps:
 Steps:
 1. Parse the task from the argument or from recent conversation context if no argument given
 2. Infer: priority (🔴/🟡/🟢), due date, linked project, linked person
-3. Search for the right kanban board - use `_CLAUDE.md` board list or search `Boards/`
+3. Search for the right kanban board - use the board map from `_CLAUDE.md` when present, otherwise resolve it from the existing bundle layout
 4. Add the task card to the correct column (`📋 This Week` or `📥 Backlog` depending on due date)
 5. Create a task note in `Tasks/` if the task is substantial (more than a one-liner)
 6. Link the task from the relevant project note and today's daily note
@@ -432,7 +454,7 @@ Steps:
 Steps:
 1. Search the vault for an existing note matching the name (fuzzy - handle typos and partial names)
 2. If found: confirm with user, then update with new info from conversation
-3. If not found: create `People/Full Name.md` with full frontmatter schema
+3. If not found: create a person note in the resolved people area with the full frontmatter schema
 4. Fill in everything inferable from the conversation: role, company, context, relationship strength, last interaction date
 5. Log the interaction in today's daily note
 6. If a People index file exists, add or update the entry there
@@ -445,8 +467,8 @@ Steps:
 
 Steps:
 1. Take the argument as the idea, or pull the most recent idea/thought from the conversation
-2. Search `Ideas/` for a related existing note - if found, append to it
-3. If new: create `Ideas/Title.md` with minimal frontmatter (`date`, `tags: [idea]`)
+2. Search the resolved ideas area for a related existing note - if found, append to it
+3. If new: create a note in the resolved ideas area with minimal frontmatter (`date`, `tags: [idea]`)
 4. Write the idea with any supporting context from the conversation
 5. Add a brief mention in today's daily note under an Ideas or Captures section
 
@@ -488,7 +510,7 @@ Do not just return filenames - return enough context for the user to act.
 
 Steps:
 1. Determine the date range from the argument (default: `week` if not specified)
-2. List all daily notes in the range with `list_files_in_dir("Daily/")`
+2. List all daily notes in the resolved daily-notes area for the range
 3. Spawn parallel subagents - one per daily note - to read and extract key points from each simultaneously
 4. Also spawn parallel agents to read dev logs and completed kanban tasks from the same period
 5. Synthesize all agent results: what was worked on, decisions made, people interacted with, tasks completed, ideas captured
@@ -521,7 +543,7 @@ Steps:
 **Shows or updates a kanban board.**
 
 Steps:
-1. If a board name is given, search `Boards/` for it (fuzzy match)
+1. If a board name is given, search the resolved boards area for it (fuzzy match)
 2. If no name given, list available boards and ask which one
 3. Read and display the current board state: columns, item counts, overdue items (past `@{date}`)
 4. Ask if the user wants to make updates - if yes, infer changes from conversation context
@@ -535,7 +557,7 @@ Steps:
 **Bulk-triages a kanban board whose columns have gone stale.** Where `/obsidian-board` only flags overdue items, this clears them.
 
 Steps:
-1. Read `_CLAUDE.md` for the boards folder and kanban convention (columns, `@{date}` format)
+1. Read `index.md` first, then `_CLAUDE.md` if present, to resolve the boards area and kanban convention (columns, `@{date}` format)
 2. Read the target board (fuzzy-match; if none given, list boards and ask), parse every open item, compute age vs today
 3. Group items into overdue (`@{date}` past), stale (older than N days, default 14), and undated; show counts per column so the bloat is visible
 4. Propose ONE verdict per stale/overdue item with a one-line reason - done / reschedule / archive / keep - as a batch the user approves, edits, or overrides
@@ -550,7 +572,7 @@ Steps:
 Steps:
 1. Search the vault for an existing project matching the name (fuzzy - handle typos)
 2. If found: show what was found, confirm, then update with new info from conversation
-3. If not found: create `Projects/Project Name.md` with full frontmatter schema (`date`, `tags: [project]`, `status: active`, `job`)
+3. If not found: create a project note in the resolved projects area with the full frontmatter schema (`date`, `tags: [project]`, `status: active`, `job`)
 4. Fill in everything inferable from the conversation: description, goals, key people, current status
 5. Add a card to the relevant kanban board in the `📥 Backlog` or `🔨 In Progress` column
 6. Link from today's daily note
@@ -561,7 +583,7 @@ Steps:
 
 **Live status overview across all tracked projects.**
 
-Reads `_CLAUDE.md` for the projects folder, then scans it for notes with `type: project` or a `repo:` field. For each project, spawns a parallel subagent that runs three checks: reads the vault note (status, last activity, next action, blockers), runs `git log` and `git status` if a `repo:` path is set, and looks for `NOTES.md` / `TODO.md` in the repo root. Merges the three into one status block (active / stalled / idle / blocked / archived inferred from activity recency), prints the full overview to the conversation ordered active-first, then injects a `## Last overview` section into each project note.
+Resolves the projects area from `index.md` and optional extension files, then scans it for notes with `type: project` or a `repo:` field. For each project, spawns a parallel subagent that runs three checks: reads the vault note (status, last activity, next action, blockers), runs `git log` and `git status` if a `repo:` path is set, and looks for `NOTES.md` / `TODO.md` in the repo root. Merges the three into one status block (active / stalled / idle / blocked / archived inferred from activity recency), prints the full overview to the conversation ordered active-first, then injects a `## Last overview` section into each project note.
 
 If a project name argument is given, shows deep context for that one project only.
 
@@ -580,9 +602,9 @@ Steps:
    - **Frontmatter agent**: identify notes missing required fields by type
    - **Staleness agent**: check overdue tasks and unfilled template syntax
    - **Orphans agent**: check orphaned notes and empty folders
-   - **Contradictions agent**: scan Key Decisions and Knowledge/ for claims that conflict or are superseded
+   - **Contradictions agent**: scan Key Decisions and the resolved knowledge/concepts area for claims that conflict or are superseded
    - **Concept gaps agent**: find terms mentioned 3+ times without a dedicated page
-   - **Stale claims agent**: flag Knowledge/ notes older than 6 months on fast-moving topics
+   - **Stale claims agent**: flag knowledge notes older than 6 months on fast-moving topics in the resolved knowledge area
 4. Merge agent results and group by severity:
    - 🔴 Critical: broken links, unfilled template syntax, contradictions
    - 🟡 Warning: duplicates, stale tasks, missing frontmatter, stale claims, concept gaps
@@ -609,7 +631,7 @@ Hybrid command backed by `scripts/eval/retrieval_eval.py`, which reuses the REAL
 Steps:
 1. Read `index.md` to understand the full vault landscape
 2. Spawn parallel subagents to find contradictions:
-   - **Claims agent**: scan `wiki/concepts/` and `wiki/projects/` for conflicting factual claims
+   - **Claims agent**: scan the resolved concepts and projects areas for conflicting factual claims
    - **Entity agent**: scan `wiki/entities/` for outdated roles, companies, or descriptions
    - **Decisions agent**: scan `wiki/decisions/` for reversed or superseded decisions never updated
    - **Source freshness agent**: compare `raw/` dates against `wiki/` pages for stale references
@@ -635,7 +657,7 @@ Steps:
    - **Entity convergence agent**: find people who appear together in multiple contexts but have no connection page
    - **Concept evolution agent**: find concepts updated 3+ times and document how thinking changed
    - **Orphan rescue agent**: find unlinked notes that should be connected to existing pages
-3. For each pattern: create `wiki/concepts/Synthesis — Title.md` with evidence, interpretation, and suggested action
+3. For each pattern: create a synthesis note in the resolved concepts area with evidence, interpretation, and suggested action
 4. Link synthesis pages FROM all source notes they reference
 5. Update `index.md`, `log.md`, and today's daily note
 
@@ -646,7 +668,7 @@ Steps:
 **Export a clean snapshot any agent or tool can consume.**
 
 Steps:
-1. Scan all notes in `wiki/` and extract: path, title, type, date, status, summary, links, tags, frontmatter
+1. Scan all persisted bundle notes and extract: path, title, type, date, status, summary, links, tags, frontmatter
 2. Output as JSON (default) to `_export/vault-snapshot.json` or markdown to `_export/vault-snapshot.md`
 3. The snapshot is a flat, structured representation of the vault - no folder structure knowledge needed
 4. Any AI tool, automation, or agent can read this file and understand the vault
@@ -656,18 +678,18 @@ Steps:
 
 ### `/obsidian-init`
 
-**Bootstraps `_CLAUDE.md` for the vault - the operating manual.**
+**Bootstraps `_CLAUDE.md` for the bundle - an optional operating-manual extension.**
 
 Steps:
-1. Glob the vault (`<vault>/**/*.md`) to map the full structure
-2. Spawn parallel subagents to discover vault context simultaneously:
+1. Glob the bundle root (`<vault>/**/*.md`) to map the full structure
+2. Spawn parallel subagents to discover bundle context simultaneously:
    - **Dashboard agent**: read `Home.md` or equivalent dashboard
    - **Templates agent**: read all files in `Templates/`
-   - **Boards agent**: read all files in `Boards/`
+   - **Boards agent**: read all files in the resolved boards area
    - **Samples agent**: read one existing note per major folder to capture naming conventions and frontmatter patterns
-3. Merge all agent results into a complete picture of the vault
-4. Generate a complete `_CLAUDE.md` using the template in `references/claude-md-template.md`, filled with real values from the vault
-5. Write it to `_CLAUDE.md` at the vault root (Write tool, or `obsidian_save_note` if using the bundled MCP server)
+3. Merge all agent results into a complete picture of the bundle
+4. Generate a complete `_CLAUDE.md` using the template in `references/claude-md-template.md`, filled with real values from the bundle
+5. Write it to `_CLAUDE.md` at the bundle root (Write tool, or `obsidian_save_note` if using the bundled MCP server)
 6. Confirm what was written and tell the user to restart their Claude session so the new file takes effect
 
 If `_CLAUDE.md` already exists: show a diff of what would change and ask before overwriting.
@@ -678,7 +700,7 @@ If `_CLAUDE.md` already exists: show a diff of what would change and ask before 
 
 **Scans a codebase and writes a maintained set of architecture notes into the vault - overview, per-module notes, key decisions. Re-runnable.**
 
-Hybrid command: `scripts/architect_scan.py` does a deterministic scan (stack, modules, dependencies, entry points, git commit) and emits JSON; Claude synthesizes the prose, rationale, a Mermaid diagram, and likely personas, then writes AI-first notes under `Projects/<name>/Architecture/` (`type: architecture-overview` + `type: architecture-module`). Pulls decision candidates from `scripts/mine_commit_decisions.py`. Refresh is the same command re-run: it uses sentinel markers (`<!-- @generated -->` / `<!-- @user -->`, see `references/write-rules.md`) so re-running updates only the generated blocks and never clobbers your hand-edits. For builders who want their code projects documented in the same brain as their ideas and decisions.
+Hybrid command: `scripts/architect_scan.py` does a deterministic scan (stack, modules, dependencies, entry points, git commit) and emits JSON; Claude synthesizes the prose, rationale, a Mermaid diagram, and likely personas, then writes AI-first notes under the resolved project architecture area (for example `Projects/<name>/Architecture/`) with `type: architecture-overview` and `type: architecture-module`. Pulls decision candidates from `scripts/mine_commit_decisions.py`. Refresh is the same command re-run: it uses sentinel markers (`<!-- @generated -->` / `<!-- @user -->`, see `references/write-rules.md`) so re-running updates only the generated blocks and never clobbers your hand-edits. For builders who want their code projects documented in the same brain as their ideas and decisions.
 
 ---
 
@@ -707,12 +729,12 @@ Steps:
 2. Classify the source type before full read: article, PDF, transcript, video, or raw text
 3. Read or fetch the full source content
 4. Extract: entities (people, companies, tools), concepts, claims, action items, notable quotes
-5. Save the raw source to `Knowledge/YYYY-MM-DD — Source Title.md` with full summary and source link
+5. Save the source note to the resolved knowledge or source area with full summary and source link
 6. Spawn parallel subagents to distribute knowledge across the vault:
-   - **People agent**: create or update People/ notes for each person mentioned
+   - **People agent**: create or update person notes for each person mentioned in the resolved people area
    - **Projects agent**: update existing project notes with new findings
-   - **Ideas agent**: create or append to Ideas/ for new concepts
-   - **Knowledge agent**: create or update Knowledge/ notes for factual claims and frameworks
+   - **Ideas agent**: create or append to the resolved ideas or incubation area for new concepts
+   - **Knowledge agent**: create or update knowledge notes for factual claims and frameworks in the resolved knowledge area
 7. Update `index.md` with all newly created notes
 8. Append to `log.md`: `## [YYYY-MM-DD] ingest | Source Title (type) — X created, Y updated`
 9. Update today's daily note with an ingest summary
@@ -759,14 +781,14 @@ Steps:
    - **Daily notes agent**: extract recurring topics, complaints, observations, energy patterns
    - **Dev logs agent**: extract repeated blockers, tools, architectural patterns
    - **Decisions agent**: look for directional trends across project notes
-   - **Ideas agent**: look for thematic clusters in Ideas/ notes
+   - **Ideas agent**: look for thematic clusters in notes from the resolved ideas or incubation area
 3. Identify:
    - **Recurring themes**: topics that appeared 3+ times without being named as a priority
    - **Emotional patterns**: what energizes vs. drains (based on language)
    - **Unnamed conclusions**: things the notes imply but never state outright
    - **Emerging directions**: where the vault suggests the user is heading
 4. Present a "Pattern Report" - each pattern with evidence (cited notes), interpretation, and suggested action
-5. Offer to save the report to `Ideas/` or a relevant project note
+5. Offer to save the report to the resolved ideas or incubation area, or to a relevant project note
 6. Log a summary in today's daily note
 
 The goal is insight the user cannot see themselves. Surface what they haven't named yet.
@@ -789,7 +811,7 @@ Steps:
    - **Transfer opportunities**: what works in A that could apply to B
    - **Collision ideas**: new concepts that only exist at the intersection
 5. Present 3-5 specific, actionable connections - not vague analogies but concrete ideas
-6. Offer to save the best connections to `Ideas/` with links to both source domains
+6. Offer to save the best connections to the resolved ideas or incubation area with links to both source domains
 7. Log the connection exercise in today's daily note
 
 The value is in unexpected links. If the connection is obvious, dig deeper.
@@ -801,12 +823,12 @@ The value is in unexpected links. If the connection is obvious, dig deeper.
 **Promotes an idea fragment into a full project spec with tasks, board entries, and structure.**
 
 Steps:
-1. If argument given: search `Ideas/`, daily notes, and captures for a matching idea (fuzzy)
+1. If an argument is given: search the resolved ideas or incubation area, daily notes, and captures for a matching idea (fuzzy)
 2. If no argument: list recent ideas (last 14 days) and ask the user to pick one
 3. Read the full idea note and any linked notes for context
 4. Research the vault for related content: overlapping projects, related people, past decisions, similar ideas explored before
 5. Generate a full project spec:
-   - **Project note** in `Projects/` with complete frontmatter (status: planning, linked idea)
+   - **Project note** in the resolved projects area with complete frontmatter (status: planning, linked idea)
    - **Goals**: 3-5 concrete outcomes
    - **Key tasks**: broken into phases with priorities
    - **Open questions**: what still needs answering
@@ -823,7 +845,7 @@ The idea doesn't die - it evolves. The original note stays as the origin story.
 
 **Convenes a panel of distinct perspectives on a decision - one independent verdict per lens, then a synthesis.**
 
-A multi-persona complement to `/obsidian-challenge` (which red-teams from one stance). Uses the vault's `Advisors/` persona notes as panelists if they exist, otherwise four generic lenses (skeptic, user, operator, long-game). Each panelist argues independently before the synthesis; the disagreement is the point and is never hidden. Saves a `type: synthesis` note to `wiki/concepts/`.
+A multi-persona complement to `/obsidian-challenge` (which red-teams from one stance). Uses the vault's `Advisors/` persona notes as panelists if they exist, otherwise four generic lenses (skeptic, user, operator, long-game). Each panelist argues independently before the synthesis; the disagreement is the point and is never hidden. Saves a `type: synthesis` note to the resolved concepts area.
 
 ---
 
@@ -855,7 +877,7 @@ Answers "what is worth doing next" from vault material. Distinct from `/obsidian
 
 **Reviews the lessons scattered across the vault and turns them into a living rulebook.**
 
-Scans daily notes, dev logs, ADRs, and auto-generated pattern reports for lessons, mistakes, and wins, then classifies each as active, stale, superseded, or a promotion candidate (appeared 3+ times - worth becoming a permanent rule in `_CLAUDE.md`). Default scope is the last 30 days (`all` for the whole vault, or a named topic). Writes a Learnings Review to `wiki/concepts/YYYY-MM-DD — Learnings Review.md` and offers to promote candidates or archive stale lessons with confirmation. Lessons that are not reviewed do not compound.
+Scans daily notes, dev logs, ADRs, and auto-generated pattern reports for lessons, mistakes, and wins, then classifies each as active, stale, superseded, or a promotion candidate (appeared 3+ times - worth becoming a permanent rule in `_CLAUDE.md`). Default scope is the last 30 days (`all` for the whole vault, or a named topic). Writes a Learnings Review to the resolved concepts area and offers to promote candidates or archive stale lessons with confirmation. Lessons that are not reviewed do not compound.
 
 ---
 
@@ -871,7 +893,7 @@ Steps:
 1. **L0 - Identity (~200 tokens)**: read `SOUL.md`/`About Me.md` and `CORE_VALUES.md`/`Values.md`
 2. **L1 - Navigation (~1-2K tokens)**: read `index.md` (vault catalog) and `log.md` (last 10 entries)
 3. **L2 - Current State (~2-5K tokens)**: read `Home.md`/`Dashboard.md`, today's daily note, last 3 daily notes, active kanban boards, previous session digests
-4. **L3 - Deep Context (on demand, ~5-20K tokens)**: only load if needed - active project notes, full Knowledge/ articles, recently mentioned people
+4. **L3 - Deep Context (on demand, ~5-20K tokens)**: only load if needed - active project notes, full knowledge articles from the resolved knowledge area, recently mentioned people
 
 Present a brief status after L0-L2 (do NOT load L3 unless needed):
 - **Who I am to you**: persona and communication style
@@ -899,7 +921,7 @@ The vault knows why it's structured the way it is - when a future session asks "
 
 ## Research Commands
 
-Seven commands that pull external knowledge into the vault - X posts, X discourse, web research with citations, vault-grounded synthesis, YouTube videos, and podcast episodes (plus `/obsidian-ingest` above for arbitrary URLs, PDFs, audio, and screenshots). All output AI-first notes per the vault's Section 0 rule (preamble, rich frontmatter, recency markers, mandatory wikilinks, sources verbatim).
+Seven commands that pull external knowledge into the vault - X posts, X discourse, web research with citations, vault-grounded synthesis, YouTube videos, and podcast episodes (plus `/obsidian-ingest` above for arbitrary URLs, PDFs, audio, and screenshots). All output AI-first notes per the vault's Section 0 rule (preamble, rich frontmatter, recency markers, canonical relative Markdown links, sources verbatim).
 
 **Setup:** API keys live at `~/.config/obsidian-second-brain/.env`. Run `install.sh` and answer "y" to the research toolkit prompt, or copy `.env.example` manually. xAI Grok and Perplexity keys are required; YouTube key is optional (transcripts work without it).
 
@@ -964,7 +986,7 @@ Steps (4 phases):
 Then:
 - Writes synthesis to `Research/Deep/YYYY-MM-DD — <slug>.md`
 - Emits a JSON propagation payload between `<<<RESEARCH_DEEP_PROPAGATION_PAYLOAD>>>` markers
-- Calling Claude reads that payload and runs `/obsidian-save`-style propagation: spawns parallel subagents to update People/Projects/Ideas/Decisions per the synthesis's "Recommended Vault Updates" bullets
+- Calling Claude reads that payload and runs `/obsidian-save`-style propagation: spawns parallel subagents to update people, projects, ideas, and decisions in their resolved bundle areas per the synthesis's "Recommended Vault Updates" bullets
 - Links new research note from today's daily note
 
 Cost: typically $0.20-$0.80 per run depending on topic depth.
@@ -1063,7 +1085,7 @@ Set these up once using the `/schedule` skill in Claude Code.
 
 Prompt to schedule:
 ```
-Read _CLAUDE.md. Create today's daily note in Daily/ using the Daily Note template.
+Read `index.md` first, then `_CLAUDE.md` if present. Create today's daily note in the resolved daily notes area using the Daily Note template.
 Pull in any tasks from kanban boards that are due today or overdue.
 List any projects with status active that have no recent activity in the last 7 days.
 Do not ask questions — infer everything from the vault. Save and stop.
@@ -1084,20 +1106,20 @@ This agent does more than close the day. It actively consolidates and improves t
 
 Prompt to schedule:
 ```
-Read _CLAUDE.md. This is a sleeptime consolidation pass — the vault should be smarter when the user wakes up.
+Read `index.md` first, then `_CLAUDE.md` if present. This is a sleeptime consolidation pass - the vault should be smarter when the user wakes up.
 
 Phase 1 — Close the day:
 - Read today's daily note. Append a ## End of Day section with a 3-5 bullet summary.
 - Move any completed kanban tasks to Done.
 
 Phase 2 — Reconcile:
-- Scan wiki/entities/ for outdated roles, companies, or descriptions that conflict with newer daily notes.
-- Scan wiki/concepts/ for claims contradicted by recently ingested sources.
-- Auto-resolve clear winners. Flag ambiguous ones in wiki/decisions/.
+- Scan the resolved entities or people area for outdated roles, companies, or descriptions that conflict with newer daily notes.
+- Scan the resolved concepts area for claims contradicted by recently ingested sources.
+- Auto-resolve clear winners. Flag ambiguous ones in the resolved decisions area.
 
 Phase 3 — Synthesize:
 - Scan sources ingested today and yesterday. Find concepts that appear in 2+ unrelated sources.
-- If patterns found: create wiki/concepts/Synthesis — Title.md with evidence and interpretation.
+- If patterns are found: create a synthesis note in the resolved concepts area with evidence and interpretation.
 
 Phase 4 — Heal:
 - Find notes created today with no incoming links. Add links from relevant existing pages.
@@ -1123,7 +1145,7 @@ Setup:
 
 Prompt to schedule:
 ```
-Read _CLAUDE.md. Run /obsidian-recap week to gather this week's activity.
+Read `index.md` first, then `_CLAUDE.md` if present. Run /obsidian-recap week to gather this week's activity.
 Generate a weekly review note using the Review template (or standard structure if none exists).
 Save to Reviews/YYYY-MM-DD — Weekly Review.md.
 Link it from this week's last daily note.
@@ -1143,8 +1165,8 @@ Setup:
 
 Prompt to schedule:
 ```
-Read _CLAUDE.md. Run: python scripts/vault_health.py --path ~/path/to/vault --json
-Parse the output. Write a health report to Knowledge/Vault Health YYYY-MM-DD.md
+Read `index.md` first, then `_CLAUDE.md` if present. Run: python scripts/vault_health.py --path ~/path/to/vault --json
+Parse the output. Write a health report to the resolved health-report area of the bundle
 summarizing findings by severity (critical, warning, info).
 Do not fix anything autonomously — only report.
 Do not ask questions. Save and stop.
@@ -1202,7 +1224,7 @@ may not be found otherwise.
 
 A background agent that fires automatically whenever Claude compacts the conversation context. It reads the session summary and propagates everything worth preserving to the vault - no user action required.
 
-**What it does:** After each compaction, a headless `claude -p` subprocess wakes up, reads `_CLAUDE.md`, scans the summary for vault-worthy items (people, projects, decisions, tasks, dev work, ideas), and writes updates everywhere they belong - people notes, project notes, dev logs, kanban boards, and today's daily note.
+**What it does:** After each compaction, a headless `claude -p` subprocess wakes up, reads `index.md` first and then any root extension files such as `_CLAUDE.md`, scans the summary for vault-worthy items (people, projects, decisions, tasks, dev work, ideas), and writes updates everywhere they belong - people notes, project notes, dev logs, kanban boards, and today's daily note.
 
 **How it works:**
 1. `PostCompact` hook fires in Claude Code after context compaction

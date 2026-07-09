@@ -20,13 +20,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import posixpath
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 SKIP_DIRS = {".obsidian", ".git", ".trash", "_trash", ".claude", "_export", "templates", "node_modules"}
 
 LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
+MD_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 CODE_FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 TYPE_RE = re.compile(r"(?m)^type:\s*[\"']?([A-Za-z0-9_-]+)")
@@ -74,6 +77,21 @@ def _link_target(link: str) -> str:
     return link
 
 
+def _markdown_note_targets(text: str, source_rel: str) -> list[str]:
+    out: list[str] = []
+    base = PurePosixPath(source_rel).parent if source_rel else PurePosixPath(".")
+    for raw in MD_LINK_RE.findall(text):
+        href = raw.strip().strip("<>").split("#", 1)[0].replace("\\", "/")
+        if not href or href.startswith("#") or SCHEME_RE.match(href):
+            continue
+        pure = PurePosixPath(href)
+        if pure.suffix.lower() != ".md":
+            continue
+        resolved = posixpath.normpath(str(base / pure))
+        out.append(PurePosixPath(resolved).stem)
+    return out
+
+
 def build_graph(vault: Path, scope: str | None = None) -> dict:
     notes: dict[str, dict] = {}
     key_to_rel: dict[str, str] = {}
@@ -109,8 +127,10 @@ def build_graph(vault: Path, scope: str | None = None) -> dict:
 
     for rel, note in notes.items():
         seen: set[str] = set()
-        for raw in LINK_RE.findall(note["content"]):
-            target = key_to_rel.get(_norm(_link_target(raw)))
+        raw_targets = [_link_target(raw) for raw in LINK_RE.findall(note["content"])]
+        raw_targets.extend(_markdown_note_targets(note["content"], rel))
+        for candidate in raw_targets:
+            target = key_to_rel.get(_norm(candidate))
             if target is None:
                 dangling += 1
                 continue

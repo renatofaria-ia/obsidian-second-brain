@@ -87,11 +87,11 @@ def obsidian_update_note(
 
 @mcp.tool()
 def obsidian_validate_note(path: str) -> str:
-    """Check a note for AI-first compliance and unresolved wikilinks.
+    """Check a note for AI-first compliance and unresolved internal note links.
 
     Returns {path, ok, issues}: missing frontmatter or required keys
     (type/date/tags/ai-first), a missing `## For future Claude` preamble, and
-    any `[[wikilink]]` whose target note does not exist. Use before/after a
+    any internal note link whose target note does not exist. Use before/after a
     write to keep the vault self-consistent.
     """
     return json.dumps(vault_ops.validate_note(path))
@@ -99,7 +99,7 @@ def obsidian_validate_note(path: str) -> str:
 
 @mcp.tool()
 def obsidian_backlinks(target: str) -> str:
-    """List every note that links to `target` via [[wikilink]].
+    """List every note that links to `target` via internal note links.
 
     `target` is a note title/stem or vault-relative path. Use to understand how
     a note is referenced before editing or to navigate the knowledge graph.

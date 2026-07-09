@@ -8,13 +8,13 @@ Use the obsidian-second-brain skill. Execute `/obsidian-visualize $ARGUMENTS`:
 
 The optional argument is a scope: a project name, entity name, topic, or "full" for the entire vault. Default: full vault.
 
-1. Read `_CLAUDE.md` first if it exists in the vault root
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions
 
 2. Build the graph deterministically with the scanner instead of reading every note into context (a full-vault read is O(read-everything) and burns the budget):
    ```bash
    python scripts/link_graph.py --path "<vault>" [--scope "<topic/project/entity>"]
    ```
-   It returns JSON with `nodes` (path, title, `type`, folder, in/out/`degree`), `edges` (resolved `[[wikilink]]` pairs), and `stats` (`node_count`, `edge_count`, `orphan_count`, `dangling_link_count`, `top_hubs`, `orphans`). Pass `--scope` for a topic/project/entity (the script keeps that note plus its 2-hop neighborhood); omit it for the full vault. Use this JSON as the graph - only open individual notes if you need a label the scan did not provide.
+   It returns JSON with `nodes` (path, title, `type`, folder, in/out/`degree`), `edges` (resolved internal note-link pairs, including relative Markdown links and compatible `[[wikilinks]]`), and `stats` (`node_count`, `edge_count`, `orphan_count`, `dangling_link_count`, `top_hubs`, `orphans`). Pass `--scope` for a topic/project/entity (the script keeps that note plus its 2-hop neighborhood); omit it for the full vault. Use this JSON as the graph - only open individual notes if you need a label the scan did not provide.
 
 3. Generate a JSON Canvas file (`.canvas`) compatible with Obsidian's native canvas viewer:
 
@@ -54,6 +54,6 @@ The user can open the `.canvas` file in Obsidian to visually explore their vault
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval - not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal link format, and any Obsidian `[[wikilinks]]` preserved only as a compatibility extension when the surrounding bundle still uses them. Sources must remain verbatim with URLs inline, with confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Search exhaustively before claiming any note, person, or file is absent - false absence is the most common failure mode - and never invent facts, entities, or dates (mark unknowns as `TBD`). See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

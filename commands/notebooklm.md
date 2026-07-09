@@ -28,7 +28,7 @@ Use the obsidian-second-brain skill. Execute `/notebooklm [topic]`:
    - Run the standard `/obsidian-save` flow: spawn parallel subagents (People, Projects, Tasks, Decisions, Ideas) and update vault notes per any "Recommended next reads or angles" bullets if they map to entities or projects.
    - Link the new synthesis note from today's daily note.
 
-5. Report back to the user: "Saved [[YYYY-MM-DD - <slug>]] to Research/NotebookLM/. Linked from today's daily note. Updated [[X]], created [[Y]]."
+5. Report back to the user with the saved path, the daily-note link that was added, and which existing notes were updated or newly created.
 
 6. Plain English triggers: "notebooklm this", "ground research on X using my vault", "source-grounded research on X", "ask my own notes about X".
 

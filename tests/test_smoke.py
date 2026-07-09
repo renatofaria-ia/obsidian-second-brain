@@ -9,12 +9,50 @@ any automated test). See FORK_INSIGHTS.md items #47/#48.
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _resolve_bash() -> str:
+    """Prefer Git Bash on Windows so the build tests do not accidentally call
+    the WSL launcher exposed as System32\bash.exe."""
+    override = os.environ.get("OBSIDIAN_BUILD_BASH")
+    if override:
+        return override
+
+    if os.name == "nt":
+        for candidate in (
+            Path(r"C:\Program Files\Git\bin\bash.exe"),
+            Path(r"C:\Program Files\Git\usr\bin\bash.exe"),
+        ):
+            if candidate.is_file():
+                return str(candidate)
+
+    bash = shutil.which("bash")
+    if bash:
+        return bash
+
+    raise AssertionError(
+        "bash executable not found; set OBSIDIAN_BUILD_BASH or install Git Bash."
+    )
+
+
+def _run_build(platform: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [_resolve_bash(), "scripts/build.sh", "--platform", platform],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def _json_from_stdout(stdout: str) -> dict:
@@ -31,13 +69,7 @@ def test_codex_cli_build_generates_expected_files():
     """The codex-cli adapter must emit the AGENTS.md manual and one native Codex
     Agent Skill per command (.agents/skills/<name>/SKILL.md). This guards the
     adapter pipeline that every command change depends on."""
-    result = subprocess.run(
-        ["bash", "scripts/build.sh", "--platform", "codex-cli"],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    result = _run_build("codex-cli")
 
     assert result.returncode == 0, result.stderr
     assert (REPO_ROOT / "dist/codex-cli/AGENTS.md").is_file()
@@ -53,13 +85,7 @@ def test_hermes_build_generates_native_skills():
     """The hermes adapter must emit one native Hermes skill per command at
     skills/<category>/<name>/SKILL.md, with the required frontmatter Hermes
     needs to load it (name, description, version, author, license)."""
-    result = subprocess.run(
-        ["bash", "scripts/build.sh", "--platform", "hermes"],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    result = _run_build("hermes")
 
     assert result.returncode == 0, result.stderr
     skill = REPO_ROOT / "dist/hermes/skills/vault/obsidian-save/SKILL.md"
@@ -91,13 +117,7 @@ def test_pi_build_generates_package():
     """The pi adapter must emit a valid Pi package: package.json with pi
     prompts/skills entries, prompt templates with frontmatter, and a discovery
     skill with valid Agent Skills frontmatter."""
-    result = subprocess.run(
-        ["bash", "scripts/build.sh", "--platform", "pi"],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    result = _run_build("pi")
 
     assert result.returncode == 0, result.stderr
 
@@ -126,6 +146,36 @@ def test_pi_build_generates_package():
     assert ".pi/skills/obsidian-second-brain" in prompt_body
 
 
+def test_vault_health_json_reports_clean_markdown_linked_vault(tmp_path):
+    """A minimal two-note vault with reciprocal relative Markdown links should
+    report zero issues after the OKF-first migration."""
+    vault = tmp_path / "vault-md"
+    vault.mkdir()
+    (vault / "Home.md").write_text(
+        "---\ntype: note\n---\n# Home\n\nSee [Project Alpha](./Project Alpha.md).\n",
+        encoding="utf-8",
+    )
+    (vault / "Project Alpha.md").write_text(
+        "---\ntype: project\n---\n# Project Alpha\n\nBack to [Home](./Home.md).\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, "scripts/vault_health.py", "--path", str(vault), "--json"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = _json_from_stdout(result.stdout)
+    assert payload["total_notes"] == 2
+    assert payload["total_issues"] == 0
+
+
 def test_vault_health_json_reports_clean_linked_vault(tmp_path):
     """A minimal two-note vault with reciprocal wikilinks should report zero
     issues: no orphans, no broken links, no missing frontmatter."""
@@ -151,6 +201,8 @@ def test_vault_health_json_reports_clean_linked_vault(tmp_path):
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
     assert result.returncode == 0, result.stderr
@@ -170,6 +222,8 @@ def test_substitution_check_passes_on_repo():
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert result.returncode == 0, result.stdout + result.stderr
 
@@ -186,6 +240,8 @@ def test_substitution_check_flags_prose_em_dash(tmp_path):
     flagged = subprocess.run(
         [sys.executable, "scripts/sweep_non_ascii.py", "--check", str(bad)],
         cwd=REPO_ROOT, check=False, capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert flagged.returncode == 1, flagged.stdout
 
@@ -194,6 +250,8 @@ def test_substitution_check_flags_prose_em_dash(tmp_path):
     passed = subprocess.run(
         [sys.executable, "scripts/sweep_non_ascii.py", "--check", str(ok)],
         cwd=REPO_ROOT, check=False, capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert passed.returncode == 0, passed.stdout
 
@@ -215,6 +273,8 @@ def test_health_normalizes_dashes_in_links(tmp_path):
     result = subprocess.run(
         [sys.executable, "scripts/vault_health.py", "--path", str(tmp_path), "--json"],
         cwd=REPO_ROOT, check=False, capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert '"wanted_note"' not in result.stdout, (
@@ -227,6 +287,8 @@ def _run_health_json(tmp_path):
     result = subprocess.run(
         [sys.executable, "scripts/vault_health.py", "--path", str(tmp_path), "--json"],
         cwd=REPO_ROOT, check=False, capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert result.returncode == 0, result.stdout + result.stderr
     return json.loads(result.stdout[result.stdout.index("{"):])
@@ -268,6 +330,128 @@ def test_health_excludes_export_bundle(tmp_path):
     data = _run_health_json(tmp_path)
     assert data["total_notes"] == 1, data["total_notes"]
     assert not [i for i in data["issues"] if i["type"] == "duplicate"]
+
+
+
+def test_export_okf_skips_reserved_names_and_writes_root_bundle(tmp_path):
+    """The OKF exporter must never treat reserved names as concept docs. It
+    should generate a root index.md with okf_version and copy the root log.md."""
+    vault = tmp_path / "vault"
+    out = vault / "_export" / "okf"
+    (vault / "concepts").mkdir(parents=True)
+    (vault / "concepts" / "index.md").write_text(
+        "# This nested index is a vault artifact and must not become a concept.\n",
+        encoding="utf-8",
+    )
+    (vault / "index.md").write_text("# Existing vault index\n", encoding="utf-8")
+    (vault / "log.md").write_text("# Existing log\n", encoding="utf-8")
+    (vault / "concepts" / "Alpha.md").write_text(
+        "---\ntype: concept\n---\n# Alpha\n\nSee [[Beta]].\n",
+        encoding="utf-8",
+    )
+    (vault / "concepts" / "Beta.md").write_text(
+        "---\ntype: concept\n---\n# Beta\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, "scripts/export_okf.py", "--path", str(vault)],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stderr
+    root_index = (out / "index.md").read_text(encoding="utf-8")
+    assert 'okf_version: "0.1"' in root_index
+    assert (out / "log.md").read_text(encoding="utf-8") == "# Existing log\n"
+    assert (out / "concepts" / "Alpha.md").is_file()
+    assert not (out / "concepts" / "index.md").exists()
+
+
+def test_export_okf_preserves_extension_fields_and_converts_links(tmp_path):
+    """The exporter must keep extension frontmatter fields while converting
+    wikilinks to relative Markdown links in the emitted bundle."""
+    vault = tmp_path / "vault"
+    out = vault / "_export" / "okf"
+    (vault / "people").mkdir(parents=True)
+    (vault / "projects").mkdir(parents=True)
+    (vault / "people" / "Renato Faria.md").write_text(
+        "---\n"
+        "type: person\n"
+        "date: 2026-07-09\n"
+        "updated: 2026-07-09\n"
+        "tags:\n"
+        "  - person\n"
+        "ai-first: true\n"
+        "timeline:\n"
+        "  - fact: Maintainer\n"
+        "    from: 2026-07-09\n"
+        "    until: present\n"
+        "related-projects:\n"
+        "  - \"[[OKF Adaptation]]\"\n"
+        "---\n"
+        "## For future Claude\n\n"
+        "Maintainer note.\n\n"
+        "See [[OKF Adaptation]].\n",
+        encoding="utf-8",
+    )
+    (vault / "projects" / "OKF Adaptation.md").write_text(
+        "---\n"
+        "type: project\n"
+        "tags:\n"
+        "  - project\n"
+        "---\n"
+        "# OKF Adaptation\n\n"
+        "Owned by [[Renato Faria]].\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, "scripts/export_okf.py", "--path", str(vault)],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stderr
+    person = (out / "people" / "Renato Faria.md").read_text(encoding="utf-8")
+    assert "ai-first: true" in person
+    assert "updated: 2026-07-09" in person or "updated: '2026-07-09'" in person
+    assert "timeline:" in person
+    assert "[OKF Adaptation](../projects/OKF Adaptation.md)" in person
+
+
+def test_bootstrap_vault_writes_okf_root_files(tmp_path):
+    """The bootstrap script must initialize canonical root index.md and log.md
+    alongside the legacy Obsidian extension files."""
+    vault = tmp_path / "bootstrapped-vault"
+    result = subprocess.run(
+        [sys.executable, "scripts/bootstrap_vault.py", "--path", str(vault), "--name", "Renato Faria"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    root_index = (vault / "index.md").read_text(encoding="utf-8")
+    root_log = (vault / "log.md").read_text(encoding="utf-8")
+    assert 'okf_version: "0.1"' in root_index
+    assert "# Renato Faria's Bundle" in root_index
+    assert '## Root' in root_index
+    assert 'type: log' in root_log
+    assert 'init | Bootstrapped bundle' in root_log
+    assert (vault / "_CLAUDE.md").is_file()
+    assert (vault / "Home.md").is_file()
 
 
 def test_health_wanted_notes_ignore_code_examples(tmp_path):
@@ -384,6 +568,29 @@ def test_mcp_vault_ops_search_ranks_title_over_noise(tmp_path, monkeypatch):
     )
 
 
+def test_link_graph_resolves_relative_markdown_links(tmp_path):
+    """link_graph.py must resolve relative Markdown links between notes, not
+    just wikilinks, after the OKF-first migration."""
+    vault = tmp_path / "vault-md-graph"
+    (vault / "wiki").mkdir(parents=True)
+    (vault / "wiki" / "Hub.md").write_text(
+        "---\ntype: project\n---\nLinks to [Leaf](./Leaf.md) and [Missing](./Missing Note.md).\n", encoding="utf-8"
+    )
+    (vault / "wiki" / "Leaf.md").write_text(
+        "---\ntype: concept\n---\nBack to [Hub](./Hub.md).\n", encoding="utf-8"
+    )
+    out = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts/link_graph.py"), "--path", str(vault)],
+        capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace", check=True,
+    )
+    graph = json.loads(out.stdout)
+    assert graph["stats"]["node_count"] == 2
+    assert graph["stats"]["edge_count"] == 2
+    assert graph["stats"]["dangling_link_count"] == 1
+
+
 def test_link_graph_builds_nodes_edges_and_orphans(tmp_path):
     """link_graph.py must resolve [[wikilinks]] to real notes, count degree, flag
     orphans, and report dangling links - the data /obsidian-visualize relies on."""
@@ -400,7 +607,9 @@ def test_link_graph_builds_nodes_edges_and_orphans(tmp_path):
     )
     out = subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts/link_graph.py"), "--path", str(vault)],
-        capture_output=True, text=True, check=True,
+        capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace", check=True,
     )
     graph = json.loads(out.stdout)
     stats = graph["stats"]
@@ -541,6 +750,35 @@ def test_mcp_vault_ops_update_note_guarded_edit(tmp_path, monkeypatch):
     assert vault_ops.update_note("../escape.md", append="x").get("error")
 
 
+def test_mcp_vault_ops_validate_and_backlinks_support_markdown_links(tmp_path, monkeypatch):
+    """The MCP connector must validate and traverse relative Markdown links in
+    OKF-style bundles, not only wikilinks."""
+    vault_ops = _load_vault_ops()
+    vault = tmp_path / "vault-md-mcp"
+    vault.mkdir()
+    monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault))
+    (vault / "Home.md").write_text(
+        "---\ntype: note\ndate: 2026-07-09\ntags:\n  - x\nai-first: true\n---\n\n"
+        "## For future Claude\nSee [Project Alpha](./Project Alpha.md) and [Ghost](./Ghost Note.md).\n",
+        encoding="utf-8",
+    )
+    (vault / "Project Alpha.md").write_text(
+        "---\ntype: project\ndate: 2026-07-09\ntags:\n  - project\nai-first: true\n---\n\n"
+        "## For future Claude\nAlpha.\n",
+        encoding="utf-8",
+    )
+
+    v = vault_ops.validate_note("Home.md")
+    assert v["ok"] is False
+    assert any("unresolved markdown link" in issue for issue in v["issues"])
+
+    bl = vault_ops.backlinks("Project Alpha")
+    assert "Home.md" in bl["backlinks"]
+
+    health = vault_ops.vault_health()
+    assert any("Ghost" in b["link"] for b in health["wanted_notes"]["sample"])
+
+
 def test_mcp_vault_ops_validate_and_backlinks_and_health(tmp_path, monkeypatch):
     """validate_note flags a missing preamble + unresolved wikilink; backlinks
     finds the referencing note; vault_health reports the wanted note."""
@@ -602,6 +840,8 @@ def test_architect_scan_emits_manifest(tmp_path):
     result = subprocess.run(
         [sys.executable, "scripts/architect_scan.py", "--path", str(proj)],
         cwd=REPO_ROOT, check=False, capture_output=True, text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert result.returncode == 0, result.stderr
     data = _json_from_stdout(result.stdout)

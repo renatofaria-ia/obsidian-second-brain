@@ -1,8 +1,8 @@
 # AI-First Note Rules
 
-The vault is designed for **future-Claude** to read and reason over, not for human review. The owner rarely opens notes directly - they call Claude to retrieve, synthesize, and connect dots across years of accumulated knowledge. **Every command that writes to the vault must produce notes that follow these rules.**
+AI-first is a fork extension layered on top of the **OKF 0.1** bundle contract. It optimizes persisted notes for **future-Claude** to read and reason over, not for human review. The owner may rarely open notes directly; they call Claude to retrieve, synthesize, and connect dots across years of accumulated knowledge. **Every fork-managed command that writes or refreshes persisted notes should follow these rules.**
 
-This document is the canonical specification. It lives at `references/ai-first-rules.md` in the obsidian-second-brain repo and is referenced from `_CLAUDE.md` Section 0, every slash command, and `references/write-rules.md`.
+This document is the canonical specification for the AI-first extension. It lives at `references/ai-first-rules.md` in the obsidian-second-brain repo and is referenced from `SKILL.md`, `references/write-rules.md`, and optional runtime files such as `_CLAUDE.md`. It is not itself the base OKF bundle contract.
 
 ---
 
@@ -12,7 +12,7 @@ This document is the canonical specification. It lives at `references/ai-first-r
 Each note must explain itself. Future-Claude may pull this single note via `/obsidian-find` or vault scan with no surrounding context. Don't rely on backlinks alone for meaning. State the *what*, the *why*, and the *when* inside the note itself.
 
 ### 2. "For future Claude" preamble
-Every note begins with a 2-3 sentence summary in plain English under a `## For future Claude` header (immediately after the frontmatter). Future-Claude reads this to decide relevance in 10 seconds before parsing the rest. State what's in the note, why it was saved, and any temporal/staleness caveat.
+Every note written or refreshed under the AI-first extension begins with a 2-3 sentence summary in plain English under a `## For future Claude` header (immediately after the frontmatter). Future-Claude reads this to decide relevance in 10 seconds before parsing the rest. State what's in the note, why it was saved, and any temporal/staleness caveat.
 
 ```markdown
 ## For future Claude
@@ -21,7 +21,7 @@ This note is a [type] about [topic] saved on [date]. It [main purpose].
 ```
 
 ### 3. Rich, consistent frontmatter
-Filterable metadata. Different note types have different schemas (see below) but every note has machine-readable frontmatter.
+Filterable metadata. Different note types have different schemas (see below) but every AI-first note has machine-readable frontmatter.
 
 **Universal fields (every note):**
 ```yaml
@@ -47,13 +47,19 @@ So future-Claude knows what to verify before trusting individual facts.
 Every external claim has its source URL inline. Don't paraphrase a citation - keep the actual URL so the claim can be re-verified or refreshed years later.
 
 ### 6. Cross-links are mandatory
-Every person, project, idea, decision, or concept referenced uses `[[wikilinks]]` so the graph is traversable by future-Claude:
+Every person, project, idea, decision, or concept referenced must be linked so the graph is traversable by future-Claude. The canonical bundle format is a relative Markdown link; `[[wikilinks]]` are a compatibility format for Obsidian-native bundles and should not be the only persisted link format:
+
+```markdown
+Sarah at [Sarah Chen](../people/sarah-chen.md) decided to ship the [Dashboard Refactor](../projects/dashboard-refactor.md) by Friday.
+```
+
+Compatibility example for an Obsidian-native bundle still using wiki links:
 
 ```markdown
 Sarah at [[People/Sarah Chen]] decided to ship the [[Projects/Dashboard Refactor]] by Friday.
 ```
 
-If a linked note doesn't exist, create a stub (per `references/write-rules.md` § Stub Notes).
+If a linked note doesn't exist, create a stub (per `references/write-rules.md` section Stub Notes).
 
 ### 7. Confidence levels
 Where applicable, mark claims with confidence:
@@ -85,6 +91,8 @@ Never invent facts, entities, rates, dates, or relationships that were not actua
 
 Frontmatter schemas by note type. **Add fields specific to your type - never remove the universal fields.**
 
+Path examples below are illustrative. Resolve relative links from the actual note location in the active bundle instead of assuming one fixed folder taxonomy.
+
 ### `type: daily`
 ```yaml
 date: YYYY-MM-DD
@@ -102,8 +110,8 @@ updated: YYYY-MM-DD           # last meaningful update
 type: project
 status: active                # active | planning | completed | archived | on-hold
 tags: [project, ...]
-related-people: ["[[People/...]]", ...]
-related-projects: ["[[Projects/...]]", ...]
+related-people: ["../people/<note>.md", ...]
+related-projects: ["../projects/<note>.md", ...]
 ai-first: true
 ```
 
@@ -114,10 +122,10 @@ updated: YYYY-MM-DD
 type: person
 tags: [person, ...]
 role: ""
-company: "[[Companies/...]]"
+company: "../companies/<note>.md"
 relationship: weak | medium | strong
 last-interaction: YYYY-MM-DD
-related-projects: ["[[Projects/...]]", ...]
+related-projects: ["../projects/<note>.md", ...]
 ai-first: true
 ```
 
@@ -127,7 +135,7 @@ date: YYYY-MM-DD
 type: idea
 tags: [idea, ...]
 status: captured              # captured | exploring | graduated | shelved
-related-projects: ["[[Projects/...]]", ...]
+related-projects: ["../projects/<note>.md", ...]
 ai-first: true
 ```
 
@@ -136,11 +144,11 @@ ai-first: true
 date: YYYY-MM-DD
 type: task
 status: in-progress           # in-progress | done | waiting | cancelled
-priority: 🔴 | 🟡 | 🟢
+priority: high | medium | low
 due: YYYY-MM-DD
 tags: [task, ...]
-related-projects: ["[[Projects/...]]", ...]
-related-people: ["[[People/...]]", ...]
+related-projects: ["../projects/<note>.md", ...]
+related-people: ["../people/<note>.md", ...]
 ai-first: true
 ```
 
@@ -150,9 +158,9 @@ Decisions usually live INSIDE project notes' Key Decisions sections. When a stan
 date: YYYY-MM-DD
 type: decision
 tags: [decision, ...]
-related-projects: ["[[Projects/...]]", ...]
+related-projects: ["../projects/<note>.md", ...]
 confidence: stated | high | medium | speculation
-sources: [...]                # inline URLs/wikilinks supporting the decision
+sources: [...]                # inline URLs and bundle links supporting the decision
 ai-first: true
 ```
 
@@ -161,8 +169,8 @@ ai-first: true
 date: YYYY-MM-DD
 type: devlog
 tags: [devlog, ...]
-project: "[[Projects/...]]"
-related-people: ["[[People/...]]", ...]
+project: "../projects/<note>.md"
+related-people: ["../people/<note>.md", ...]
 ai-first: true
 ```
 
@@ -206,13 +214,13 @@ type: adr
 tags: [adr, decision]
 decision: ""                  # one-line summary
 status: proposed | accepted | superseded
-related-projects: ["[[Projects/...]]", ...]
-supersedes: "[[Knowledge/ADR-...]]"   # optional
+related-projects: ["../projects/<note>.md", ...]
+supersedes: "../knowledge/ADR-....md"   # optional
 ai-first: true
 ```
 
 ### `type: synthesis` / `type: emerge` / `type: connect` / `type: challenge`
-Outputs from thinking tools. Each saves to `Knowledge/` or `Ideas/` with:
+Outputs from thinking tools. Each saves to the resolved concepts, knowledge, or ideas area in the active bundle, with:
 ```yaml
 date: YYYY-MM-DD
 type: <thinking-tool-type>
@@ -264,7 +272,7 @@ start: "YYYY-MM-DDTHH:MM:SS+HH:MM"
 end: "YYYY-MM-DDTHH:MM:SS+HH:MM"
 duration-min: 0
 organizer: ""
-attendees: ["[[People/...]]", ...]
+attendees: ["../people/<note>.md", ...]
 tags: [meeting]
 ai-first: true
 ```
@@ -276,7 +284,7 @@ date: YYYY-MM-DD
 type: recurring-task
 cadence: ""                  # e.g. "monthly day 20", "every quarter", "weekly Mon"
 owner: ""
-blocker: "[[People/...]]"    # optional - who/what gates it
+blocker: "../people/<note>.md"    # optional - who/what gates it
 next-due: YYYY-MM-DD         # computed next occurrence
 amount: ""                   # optional - for payments
 tags: [recurring-task]
@@ -284,11 +292,11 @@ ai-first: true
 ```
 
 ### `type: architecture-overview`
-Written by `/obsidian-architect`. The top-level map of a codebase: stack, modules, one diagram, personas. Lives under `Projects/<name>/Architecture/`.
+Written by `/obsidian-architect`. The top-level map of a codebase: stack, modules, one diagram, personas. Lives under the resolved project architecture area (for example `Projects/<name>/Architecture/` in human-first bundles).
 ```yaml
 date: YYYY-MM-DD
 type: architecture-overview
-project: "[[Projects/...]]"
+project: "../projects/<note>.md"
 stack: []                    # languages / frameworks detected
 scanned-commit: ""           # the git short-commit the docs reflect (recency anchor)
 tags: [architecture]
@@ -300,7 +308,7 @@ Written by `/obsidian-architect`, one per core module: what it does, what it dep
 ```yaml
 date: YYYY-MM-DD
 type: architecture-module
-project: "[[Projects/...]]"
+project: "../projects/<note>.md"
 module: ""                   # module name
 path: ""                     # path within the codebase
 scanned-commit: ""
@@ -321,13 +329,13 @@ Daily note for YYYY-MM-DD. Captures what was worked on, who was met, decisions m
 ### Project note
 ```markdown
 ## For future Claude
-[Project name] is a [type — work / personal / open-source] project with status [status] as of [date]. The Overview section explains what it is and why it exists. Recent Activity captures the last 30 days. Key Decisions documents major directional choices with rationale.
+[Project name] is a [type - work / personal / open-source] project with status [status] as of [date]. The Overview section explains what it is and why it exists. Recent Activity captures the last 30 days. Key Decisions documents major directional choices with rationale.
 ```
 
 ### Person note
 ```markdown
 ## For future Claude
-[Name] is [role] at [[Company]]. Relationship strength: [weak/medium/strong] as of [date]. Last interaction: [date]. The Recent Interactions section logs every conversation chronologically.
+[Name] is [role] at [Company](../companies/company.md). Relationship strength: [weak/medium/strong] as of [date]. Last interaction: [date]. The Recent Interactions section logs every conversation chronologically.
 ```
 
 ### Idea note
@@ -377,12 +385,12 @@ Don't do these. They produce notes that are useless to future-Claude.
 | `date: today` | Use the actual `YYYY-MM-DD` - "today" is meaningless when read later |
 | Bare claims without dates | "Mem0 is the leader" - leader as of when? |
 | External URL omitted | "According to a study, X is true" - which study? |
-| Plain text names instead of `[[wikilinks]]` | Breaks the link graph - future-Claude can't traverse |
+| Plain text names instead of internal links | Breaks the link graph - future-Claude cannot traverse |
 | "See above" / "as mentioned" | Future-Claude may pull this note in isolation. Repeat the context. |
 | Trusting the model to infer | Be explicit. State the type, the rule applied, the source. |
 | Multi-paragraph human-readable narratives | Bullets and structure beat prose for retrieval. |
 | Forgetting `ai-first: true` | The flag lets future-Claude know which notes meet the standard. |
-| Em-dash (`—`), curly quotes (`"`), Unicode math (`≥ ≤ ≠`) | Substitution Unicode slips in silently via LLM defaults. Caught by `validate-ai-first.sh` check 5. Use ` - ` for dashes, straight `"` quotes, ASCII operators (`>=`, `!=`). Allowed: box-drawing (`─`), arrows (`→ ←`), currency (`€ £ ¥`), Nerd Font codepoints - all carry semantic meaning. |
+| Unicode punctuation or substitution artifacts in syntax examples | These slips creep in silently via LLM defaults and hurt portability. Prefer ` - ` for dashes, straight `"` quotes, and ASCII operators like `>=`, `<=`, and `!=` unless the file intentionally uses Unicode. |
 
 ---
 
@@ -395,7 +403,7 @@ When auditing an existing note (Phase 2 work or one-off cleanup), verify:
 - [ ] `type:` field set correctly
 - [ ] `date:` in YYYY-MM-DD format
 - [ ] Tags include the type
-- [ ] All people/projects/concepts use `[[wikilinks]]`
+- [ ] All people/projects/concepts use internal links; relative Markdown links are canonical
 - [ ] External claims have recency markers AND source URLs
 - [ ] If multi-source, confidence levels marked
 - [ ] No "see above" or context-dependent references
