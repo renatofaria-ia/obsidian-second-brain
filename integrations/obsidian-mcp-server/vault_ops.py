@@ -516,7 +516,9 @@ def get_skill(name: str) -> Dict[str, Any]:
     note = (
         "Run this skill using the MCP tools on this server for vault I/O: "
         "obsidian_search (find/recall), obsidian_read_note (read), "
-        "obsidian_save_note / obsidian_capture (write). Follow the steps below."
+        "obsidian_save_note / obsidian_capture (create), obsidian_update_note "
+        "(update existing notes), obsidian_validate_note (verify AI-first + links), "
+        "and obsidian_backlinks (inspect graph context). Follow the steps below."
     )
     return {
         "name": name,

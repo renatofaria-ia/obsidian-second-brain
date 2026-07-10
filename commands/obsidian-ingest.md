@@ -25,31 +25,42 @@ The argument is a URL, file path, or pasted text. If no argument, ask what to in
    - **Claims**: assertions with supporting evidence
    - **Action items**: anything actionable for the user
    - **Quotes**: notable quotes worth preserving
-6. Save the raw source to `raw/` as an immutable extension area:
+6. Decide explicitly which outputs this ingest should produce. There are four valid outputs and they can coexist:
+   - **Raw source record** in `raw/` as an extension area
+   - **Concept update** when the source deepens an existing entity, idea, project, or task
+   - **New concept** when the source introduces something genuinely new to the bundle
+   - **Synthesis page** when the value is in connecting several existing notes rather than duplicating one source
+7. When source preservation is useful, save the raw source to `raw/` as an immutable extension area:
    - create a dated Markdown record in `raw/articles/`, `raw/transcripts/`, `raw/pdfs/`, or `raw/videos/`
    - use valid YAML frontmatter
    - include at minimum `type`, `source_type`, `source_url` when applicable, and provenance metadata
-7. Rewrite the bundle, not just append to it:
+   - treat `raw/` as a documented fork extension, not as part of the core bundle contract
+8. Rewrite the bundle, not just append to it, using this order:
    - search existing concept docs before creating new ones
    - update matching entity, concept, and project notes in place when the new source changes or deepens them
-   - create synthesis pages when the new source reveals a pattern across multiple existing notes
-   - when the new source conflicts with an older claim, record the contradiction and prefer the more recent or more authoritative evidence
-8. Use the canonical link format when writing bundle content:
+   - create a new concept only when no existing concept can absorb the knowledge cleanly
+   - create a synthesis page when the real value is the pattern across multiple notes
+   - when the new source conflicts with an older claim, record the contradiction in the affected concept and prefer the more recent or more authoritative evidence
+9. Use the canonical link format when writing bundle content:
    - prefer relative Markdown links in the persisted bundle
    - if the runtime also keeps `[[wikilinks]]` for authoring compatibility, treat them as an extension, not as the canonical persisted format
-9. Update structural files after the ingest:
+10. Update structural files after the ingest:
    - rebuild `index.md` sections affected by the ingest so the bundle catalog stays current
    - append an ingest entry to `log.md` at the root as the canonical append-only log
    - if `Logs/YYYY-MM-DD.md` also exists, update it as an extension without skipping the root `log.md`
-10. Update the relevant daily or log notes when that extension structure exists in the bundle.
-11. Report back with:
+11. Update the relevant daily or log notes only when that extension structure already exists in the bundle.
+12. Validate the touched notes before finishing:
+   - run `obsidian_validate_note` on concepts or synthesis pages that were newly created or materially rewritten
+   - if a rewrite introduced broken links or invalid frontmatter, fix it before reporting success
+13. Report back with:
    - source title and type
+   - whether a raw-source record was written
    - new pages created
    - existing pages rewritten and what changed
    - contradictions resolved
    - synthesis pages created
 
-The bundle should become more accurate, more connected, and more navigable after every ingest. If an ingest only creates new files and does not improve any existing concept or index path, it was too shallow.
+The bundle should become more accurate, more connected, and more navigable after every ingest. If an ingest only creates raw files or new notes without improving any existing concept, synthesis, or index path, it was too shallow.
 
 ---
 

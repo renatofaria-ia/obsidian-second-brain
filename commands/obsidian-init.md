@@ -14,7 +14,10 @@ Use the obsidian-second-brain skill. Execute `/obsidian-init`:
    - **Boards agent**: read files in `Boards/` if that extension folder exists
    - **Samples agent**: read one existing note per major folder to capture naming conventions and frontmatter patterns
 4. Merge all agent results into a complete picture of the bundle.
-5. Generate or refresh a complete `_CLAUDE.md` using the template in `references/claude-md-template.md`, filled with real values from the bundle. `_CLAUDE.md` is an extension file, not part of the core OKF contract.
+5. Establish the bundle core first:
+   - `index.md` is the required front door
+   - `log.md` is the required append-only root log
+   - everything else is an extension, even when this fork chooses to seed it by default
 6. Generate `index.md` at the bundle root as the canonical navigation file:
    - add frontmatter with `type: index` and `okf_version: "0.1"`
    - list concept docs and important extension files by progressive disclosure
@@ -24,9 +27,13 @@ Use the obsidian-second-brain skill. Execute `/obsidian-init`:
    - create `log.md` at the bundle root as the canonical append-only log
    - append today's init entry: `## [YYYY-MM-DD] init | Bundle initialized with index.md, log.md, and extension files`
    - if the bundle already uses `Logs/YYYY-MM-DD.md`, keep that extension structure too, but do not omit the root `log.md`
-8. Create `Bases/` at the bundle root if it does not exist. Stamp the premade base files from `references/bases/` when the matching folders exist. Treat `Bases/` as an optional Obsidian extension, not as part of the core bundle contract.
-9. Write `_CLAUDE.md`, `index.md`, `log.md`, and any new `Bases/*.base` files.
-10. Confirm what was written and tell the user to restart the Claude session if they want the new `_CLAUDE.md` rules to take effect automatically.
+8. Generate or refresh extension files only after the core bundle is stable:
+   - generate `_CLAUDE.md` using the template in `references/claude-md-template.md`, filled with real values from the bundle
+   - `_CLAUDE.md` is an extension file, not part of the core OKF contract
+   - create `Bases/` only as an optional Obsidian extension and stamp the premade base files from `references/bases/` when the matching folders exist
+   - keep `Boards/`, `Templates/`, `Logs/`, `.obsidian/`, and `Home.md` clearly in the extension layer even when this fork bootstraps them
+9. Write `index.md`, `log.md`, `_CLAUDE.md`, and any extension files that this fork seeds by default.
+10. Confirm what was written, separating core bundle files from extension files, and tell the user to restart the Claude session only if they want the new `_CLAUDE.md` rules to take effect automatically.
 
 If `_CLAUDE.md` already exists: show a diff of what would change and ask before overwriting.
 If `index.md` already exists: regenerate it because it is the canonical bundle catalog.

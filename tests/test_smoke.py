@@ -703,7 +703,11 @@ def test_mcp_vault_ops_skills_exclude_niche(monkeypatch):
     assert "obsidian-save" in names
     assert names.isdisjoint({"obsidian-health", "obsidian-challenge", "create-command"})
     assert vault_ops.get_skill("obsidian-health").get("error")
-    assert "instructions" in vault_ops.get_skill("obsidian-save")
+    skill = vault_ops.get_skill("obsidian-save")
+    assert "instructions" in skill
+    assert "obsidian_update_note" in skill["instructions"]
+    assert "obsidian_validate_note" in skill["instructions"]
+    assert "obsidian_backlinks" in skill["instructions"]
 
 
 def test_mcp_vault_ops_get_skill_rejects_path_traversal(monkeypatch):

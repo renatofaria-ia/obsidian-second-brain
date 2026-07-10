@@ -9,7 +9,7 @@ Use the obsidian-second-brain skill. Execute `/obsidian-export $ARGUMENTS`:
 The optional argument is the format: `json` (default), `markdown`, or `okf`.
 
 1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` also exists, treat it as an extension file that may refine local conventions.
-2. Build a structured export by scanning the knowledge bundle.
+2. Build a structured export by scanning the knowledge bundle. Treat the JSON and Markdown formats as derived snapshots; they are useful interchange artifacts, but they are not the canonical persisted bundle.
 
    **For each concept document**, extract:
    - `path`: file path relative to bundle root
@@ -45,11 +45,11 @@ The optional argument is the format: `json` (default), `markdown`, or `okf`.
      ]
    }
    ```
-   Save to `_export/vault-snapshot.json`.
+   Save to `_export/vault-snapshot.json`. This is a derived snapshot, not a replacement for the bundle itself.
 
    **Markdown**:
    A flat markdown file with every concept listed with its metadata and summary.
-   Save to `_export/vault-snapshot.md`.
+   Save to `_export/vault-snapshot.md`. This is also a derived snapshot, not a replacement for the bundle itself.
 
    **OKF**:
    Do NOT build this by hand. Run the deterministic exporter:
@@ -61,12 +61,13 @@ The optional argument is the format: `json` (default), `markdown`, or `okf`.
    It writes an OKF-compatible bundle to `_export/okf/` with these rules:
    - every concept becomes a markdown concept doc with required `type` and generated `timestamp`
    - `index.md` and `log.md` are treated as reserved names, not concept files
-   - internal `[[wikilinks]]` in the body are converted to relative Markdown links
+   - internal links are emitted as relative Markdown links in the exported bundle
+   - `[[wikilinks]]` are only tolerated as authoring compatibility in the source bundle and are converted during export
    - extension frontmatter fields are preserved whenever possible (`ai-first`, `updated`, `timeline`, `related-projects`, etc.)
    - a root `index.md` is generated with `type: index` and `okf_version: "0.1"`
    - a root `log.md` is always emitted
 
-4. Append to the operation log: if `Logs/` exists write `**HH:MM** - export | Vault snapshot exported (format, N notes)` to `Logs/YYYY-MM-DD.md`; otherwise append `## [YYYY-MM-DD] export | Vault snapshot exported (format, N notes)` to `log.md`.
+4. Append to the operation log after the export completes: always update the root `log.md`; if `Logs/` exists, update the dated extension log too.
 
 This file is the bridge between your bundle and any other AI tool, automation, or agent. They should not need to know your local folder conventions to consume it.
 
