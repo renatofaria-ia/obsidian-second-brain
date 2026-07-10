@@ -2,6 +2,7 @@
 description: Export a clean structured snapshot of the vault that any agent or tool can consume - flat JSON, markdown index, or an OKF bundle
 category: meta
 triggers_en: ["export vault", "snapshot vault", "dump vault", "vault export"]
+triggers_pt: ["exporte o bundle", "gere um snapshot do bundle", "despeje o bundle", "exportação do bundle"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-export $ARGUMENTS`:

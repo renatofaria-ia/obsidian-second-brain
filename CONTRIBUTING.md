@@ -111,7 +111,7 @@ triggers_en: ["save this", "save the conversation", "save to vault", "obsidian s
 ---
 ```
 
-To add a new language, add a `triggers_<two-letter-code>:` line right after the existing `triggers_en:` line, with a list of equivalent phrases in that language. **Important:** use natural, conversational phrases a native speaker would actually say - not literal word-for-word translations of the English.
+To add a new language, add a `triggers_<two-letter-code>:` line right after the existing `triggers_en:` line, with a list of equivalent phrases in that language. **Important:** use natural, conversational phrases a native speaker would actually say - not literal word-for-word translations of the English. This repo now ships `triggers_pt:` across all commands as the reference implementation for a non-English language.
 
 Supported language codes (add more by editing `_lang_label()` in `adapters/lib.sh`):
 

@@ -2,6 +2,7 @@
 description: Surface unnamed patterns from your recent notes - recurring themes, hidden connections, and conclusions you haven't explicitly stated
 category: thinking
 triggers_en: ["find patterns", "what is emerging", "surface themes", "unnamed patterns"]
+triggers_pt: ["encontre padrões", "o que está emergindo", "mostre temas", "padrões sem nome"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-emerge $ARGUMENTS`:

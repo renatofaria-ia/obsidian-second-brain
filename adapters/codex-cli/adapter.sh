@@ -91,22 +91,27 @@ EOF
 _codex_emit_skills() {
   local src="$1" dst="$2"
   [[ -d "$src" ]] || return 0
-  local f name desc triggers out
+  local f name desc triggers_en triggers_pt triggers out
   for f in "$src"/*.md; do
     [[ -f "$f" ]] || continue
     should_include "$f" "$CODEX_PLATFORM" || continue
 
     name="$(basename "$f" .md)"
     desc="$(parse_frontmatter "$f" description)"
-    triggers="$(parse_frontmatter "$f" triggers_en)"
+    triggers_en="$(parse_frontmatter "$f" triggers_en)"
+    triggers_pt="$(parse_frontmatter "$f" triggers_pt)"
     [[ -z "$desc" ]] && desc="Run the $name command of the obsidian-second-brain skill."
 
-    # Fold triggers into the description for implicit selection.
-    if [[ -n "$triggers" ]]; then
-      local trig_clean
-      trig_clean="$(echo "$triggers" | tr -d '[]"' | sed 's/,/, /g; s/  */ /g; s/^ *//; s/ *$//')"
-      [[ -n "$trig_clean" ]] && desc="$desc Triggers: $trig_clean."
+    # Fold English + pt-BR triggers into the description for implicit selection.
+    local trig_parts=() trig_clean
+    if [[ -n "$triggers_en" ]]; then
+      trig_parts+=("$(echo "$triggers_en" | tr -d '[]"' | sed 's/,/, /g; s/  */ /g; s/^ *//; s/ *$//')")
     fi
+    if [[ -n "$triggers_pt" ]]; then
+      trig_parts+=("PT-BR: $(echo "$triggers_pt" | tr -d '[]"' | sed 's/,/, /g; s/  */ /g; s/^ *//; s/ *$//')")
+    fi
+    trig_clean="$(printf "%s\n" "${trig_parts[@]}" | sed '/^$/d' | paste -sd '; ' -)"
+    [[ -n "$trig_clean" ]] && desc="$desc Triggers: $trig_clean."
 
     mkdir -p "$dst/$name"
     out="$dst/$name/SKILL.md"

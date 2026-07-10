@@ -2,6 +2,7 @@
 description: Measure how well vault search finds the right note for a natural-language question - recall@k and MRR, with the concrete failures
 category: meta
 triggers_en: ["evaluate retrieval", "how good is my vault search", "retrieval eval", "test vault search quality", "measure find quality"]
+triggers_pt: ["avalie a recuperação", "quão boa é a busca do meu bundle", "avaliação de recuperação", "teste a qualidade da busca do bundle", "meça a qualidade da busca"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-retrieval-eval $ARGUMENTS`:

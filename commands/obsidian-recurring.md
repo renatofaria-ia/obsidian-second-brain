@@ -2,6 +2,7 @@
 description: Track a recurring obligation (payment, filing, ops) with a cadence and a computed next-due date
 category: vault
 triggers_en: ["recurring task", "monthly obligation", "remind me every month", "recurring payment", "track a recurring"]
+triggers_pt: ["tarefa recorrente", "obrigação mensal", "me lembre todo mês", "pagamento recorrente", "acompanhe algo recorrente"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-recurring $ARGUMENTS`:

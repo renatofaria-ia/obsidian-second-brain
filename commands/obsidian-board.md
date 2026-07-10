@@ -2,6 +2,7 @@
 description: Show or update a kanban board - flags overdue items, updates from conversation
 category: vault
 triggers_en: ["show board", "kanban", "what is on my board", "update board"]
+triggers_pt: ["mostre o board", "kanban", "o que está no meu board", "atualize o board"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-board $ARGUMENTS`:

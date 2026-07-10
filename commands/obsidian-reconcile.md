@@ -2,6 +2,7 @@
 description: Find and resolve contradictions in the vault - the vault maintains its own truth
 category: thinking
 triggers_en: ["find contradictions", "reconcile vault", "fix conflicts", "vault contradictions"]
+triggers_pt: ["encontre contradições", "reconcilie o bundle", "corrija conflitos", "contradições do bundle"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-reconcile $ARGUMENTS`:

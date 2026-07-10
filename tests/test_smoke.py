@@ -76,9 +76,19 @@ def test_codex_cli_build_generates_expected_files():
     skill = REPO_ROOT / "dist/codex-cli/.agents/skills/obsidian-save/SKILL.md"
     assert skill.is_file()
     # Native skills require name + description frontmatter for discovery.
-    head = skill.read_text(encoding="utf-8")[:400]
+    head = skill.read_text(encoding="utf-8")[:900]
     assert "name: obsidian-save" in head
     assert "description:" in head
+    assert "PT-BR: salve isto, salve a conversa, salve no bundle, obsidian save." in head
+
+
+def test_portuguese_trigger_lines_keep_utf8_text():
+    """Portuguese trigger lines must keep real UTF-8 characters rather than
+    replacement question marks introduced by shell/editor encoding mistakes."""
+    for path in (REPO_ROOT / "commands").glob("*.md"):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.startswith("triggers_pt:"):
+                assert "?" not in line, f"replacement '?' found in {path.name}: {line}"
 
 
 def test_hermes_build_generates_native_skills():

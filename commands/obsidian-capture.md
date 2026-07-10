@@ -2,6 +2,7 @@
 description: Quick idea capture - zero friction, saves to your ideas folder and mentions in daily note
 category: vault
 triggers_en: ["capture this idea", "save this idea", "quick note", "drop a thought"]
+triggers_pt: ["capture esta ideia", "salve esta ideia", "anotação rápida", "registre um pensamento"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-capture $ARGUMENTS`:

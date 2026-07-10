@@ -2,6 +2,7 @@
 description: Ingest a source into the bundle and rewrite affected concepts, index.md, and log.md in an OKF-first flow
 category: research
 triggers_en: ["ingest this source", "add this article", "import this", "absorb this"]
+triggers_pt: ["ingira esta fonte", "adicione este artigo", "importe isto", "absorva isto"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-ingest $ARGUMENTS`:

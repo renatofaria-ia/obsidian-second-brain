@@ -2,7 +2,7 @@
 
 Fork OKF-first de `obsidian-second-brain` para **Claude Code**, **Codex CLI**, **Gemini CLI**, **OpenCode**, **Hermes** e **Pi**.
 
-Este fork preserva os nomes públicos dos comandos na fase atual, mas muda o contrato de persistência para um bundle governado por **OKF-first**, com base explícita em **Open Knowledge Format (OKF) 0.1**. O objetivo é manter o valor operacional do projeto original enquanto torna o formato persistido mais claro, portátil e verificável.
+Este fork preserva os nomes públicos dos comandos na fase atual, mas muda o contrato de persistência para um bundle **OKF-first**, com base explícita em **Open Knowledge Format (OKF) 0.1**. O objetivo é manter o valor operacional do projeto original enquanto torna o formato persistido mais claro, portátil e verificável.
 
 ## Resumo
 
@@ -27,7 +27,7 @@ Este fork preserva os nomes públicos dos comandos na fase atual, mas muda o con
 
 Você usa um agente no terminal todos os dias, mas cada sessão tende a começar do zero. Ao mesmo tempo, suas notas em Obsidian acumulam contexto, decisões, pessoas, tarefas e ideias que raramente voltam para melhorar o trabalho seguinte.
 
-O projeto original resolve parte disso ao transformar o vault em uma base viva. Este fork adiciona o que faltava para transformar essa base em um bundle persistido com contrato explícito:
+O projeto original resolve parte disso ao transformar o vault em uma base viva. Este fork acrescenta o que faltava para transformar essa base em um bundle persistido com contrato explícito:
 
 - um contrato persistido explícito;
 - separação entre núcleo interoperável e extensão local;
@@ -36,7 +36,7 @@ O projeto original resolve parte disso ao transformar o vault em uma base viva. 
 
 ## Como este fork estende a LLM Wiki
 
-A ideia-base continua próxima do padrão da LLM Wiki do Karpathy: fontes entram, páginas são atualizadas e o conhecimento fica recuperável. A diferença é que o fork passa a explicitar o contrato do bundle.
+A ideia-base continua próxima do padrão da LLM Wiki do Karpathy: fontes entram, páginas são atualizadas e o conhecimento permanece recuperável. A diferença é que o fork passa a explicitar o contrato do bundle.
 
 | Aspecto | LLM Wiki / upstream | Este fork |
 |---|---|---|
@@ -74,6 +74,8 @@ Tudo o que vai além do núcleo OKF continua disponível, mas deixa de ser trata
 
 ## O que acontece quando você instala
 
+Além do contrato técnico, a experiência do fork inclui extensões documentadas de pesquisa, manutenção e automação. Na prática, a instalação passa a cobrir fluxos como estes:
+
 **Depois de uma reunião:** `/obsidian-save`  
 O agente extrai decisões, pessoas, tarefas e ideias da conversa e atualiza as notas corretas no bundle.
 
@@ -92,8 +94,29 @@ O agente busca falhas parecidas, decisões antigas e reversões já registradas 
 **Quando você quer navegar o mapa geral:** `/obsidian-visualize`  
 O comando gera uma visão estrutural do bundle, destacando hubs, órfãos e agrupamentos por tipo.
 
+**Quando o dia termina:** agente noturno e manutenção agendada  
+As extensões de manutenção podem fechar o dia, reconciliar contradições, sintetizar padrões entre fontes, religar notas órfãs e reconstruir o índice. Você acorda com um bundle mais coerente.
+
 **No início do dia:** `/obsidian-daily`  
 A nota diária é criada ou atualizada com tarefas pendentes, contexto recente e eventos relevantes.
+
+**Quando alguém compartilha um post do X:** `/x-read https://x.com/...`  
+O fluxo lê post, thread e sinais de resposta, devolvendo texto, claims, resumo e contexto útil para salvar ou confrontar com o que já existe no bundle.
+
+**Quando você quer planejar conteúdo ou captar sinal social:** `/x-pulse "automação com IA"`  
+O comando rastreia temas em alta, lacunas, vozes relevantes e hooks úteis para escrita, pesquisa ou posicionamento.
+
+**Quando você precisa de pesquisa real:** `/research "ferramentas de memória para IA"`  
+O resultado é um dossiê com fatos, timeline, players, contrapontos e fontes, pronto para ser incorporado ao bundle.
+
+**Quando você quer pesquisa vault-first:** `/research-deep "ferramentas de memória para IA"`  
+O fluxo parte do que já existe no bundle, identifica lacunas e pesquisa só o delta necessário, evitando refazer trabalho já acumulado.
+
+**Quando você encontra um vídeo importante:** `/youtube https://youtu.be/...`  
+Transcript, metadados e sinais visuais relevantes viram uma nota pesquisável, em vez de um link perdido ou uma lembrança vaga.
+
+**Você não precisa abrir o Obsidian para que o bundle evolua.**  
+A proposta do projeto continua sendo reduzir o atrito entre conversar, pesquisar, decidir, salvar e recuperar contexto.
 
 ## Antes e depois
 
@@ -105,17 +128,23 @@ A nota diária é criada ou atualizada com tarefas pendentes, contexto recente e
 | Contradições | ficam escondidas | podem ser reconciliadas explicitamente |
 | Exportação | formato difuso | bundle OKF exportável e legível por outros consumidores |
 | Contexto para IA futura | implícito | contrato persistido e extensões documentadas |
+| Rotina noturna | nenhuma manutenção | reconciliação, síntese e healing como extensão do fork |
+| Ler uma thread do X | abrir a rede, rolar, copiar e colar | `/x-read` retorna texto, claims e contexto útil |
+| Descobrir temas para publicar | feeling ou chute | `/x-pulse` traz temas, gaps e hooks observáveis |
+| Pesquisa web | abrir abas e compilar manualmente | `/research` gera um dossiê com fontes |
+| Pesquisar o que você já sabe | refazer do zero | `/research-deep` parte do bundle e busca só o delta |
+| Vídeos importantes | consumir e esquecer | `/youtube` transforma transcript e sinais visuais em nota pesquisável |
 
 ## Como funciona
 
-O comportamento do fork pode ser visto em quatro camadas:
+O comportamento do fork se organiza em quatro camadas:
 
 - **Operações:** captura, ingestão, exportação, manutenção e visualização do vault.
 - **Pensamento:** challenge, síntese, distilação, conexão e revisão.
 - **Contexto:** pessoas, projetos, mundo e retomada de contexto.
 - **Pesquisa:** web, X, YouTube, podcast e fluxos grounded.
 
-São **44 comandos** no total. O comando de calendário (`/obsidian-calendar`) permanece exclusivo do Claude Code, então os builds de Codex, Gemini, OpenCode, Hermes e Pi expõem 43 comandos cross-platform.
+São **44 comandos** no total. O comando de calendário (`/obsidian-calendar`) permanece exclusivo do Claude Code, então os builds de Codex, Gemini, OpenCode, Hermes e Pi expõem 43 comandos multiplataforma.
 
 ## 44 comandos
 
@@ -187,7 +216,7 @@ A classificação técnica dos comandos em `OKF-core`, `OKF + extensão` e `Obsi
 
 ## O bundle está vivo
 
-O objetivo do fork não é arquivar informação e esquecer. O objetivo é fazer o bundle, inclusive quando armazenado em um vault Obsidian, compor ao longo do tempo:
+O objetivo do fork não é arquivar informação e esquecer. A proposta é fazer o bundle, inclusive quando armazenado em um vault Obsidian, amadurecer ao longo do tempo:
 
 - uma fonte nova atualiza páginas já existentes;
 - conhecimento repetido vira estrutura mais estável;
@@ -208,7 +237,7 @@ Sem preset, o bootstrap gera uma base genérica e funcional.
 
 ## Agente de background e agentes agendados
 
-O projeto continua suportando a ideia de manutenção contínua do vault, mas agora essa camada fica claramente posicionada como extensão do fork, não como definição do formato base.
+O projeto continua suportando manutenção contínua do vault, mas essa camada fica claramente posicionada como extensão do fork, não como definição do formato base.
 
 Exemplos de comportamento:
 
@@ -274,7 +303,7 @@ A skill continua agnóstica ao modelo. Os builds de OpenCode, Codex e Gemini fun
 
 ## Toolkit de pesquisa opcional
 
-Os comandos de pesquisa podem exigir chaves ou conectores, dependendo do fluxo. Mesmo assim, o toolkit continua útil parcialmente sem todas as integrações habilitadas.
+Os comandos de pesquisa podem exigir chaves ou conectores, dependendo do fluxo. Ainda assim, o toolkit continua útil mesmo sem todas as integrações habilitadas.
 
 Em geral:
 
@@ -347,7 +376,7 @@ Sim. O fluxo suporta configuração por projeto para cenários multi-repo.
 
 ## Filosofia
 
-A maior parte das ferramentas de second brain transforma o usuário em zelador do sistema. Este fork tenta inverter essa relação. Você pensa, trabalha e conversa; o agente cuida da memória operacional, reaproveita o histórico e ajuda a melhorar o raciocínio futuro com contexto persistido.
+Grande parte das ferramentas de second brain transforma o usuário em zelador do sistema. Este fork tenta inverter essa relação. Você pensa, trabalha e conversa; o agente cuida da memória operacional, reaproveita o histórico e ajuda a melhorar o raciocínio futuro com contexto persistido.
 
 **Suas notas são o moat.**
 

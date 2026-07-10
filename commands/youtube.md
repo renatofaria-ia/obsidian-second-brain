@@ -2,6 +2,7 @@
 description: Extract transcript, metadata, and top comments from a YouTube video - summarized via Grok and saved to vault. Add --visual to also read the video's frames (scene detection)
 category: research
 triggers_en: ["summarize youtube", "youtube transcript", "extract video", "youtube to vault", "watch this video", "what's on screen in this video"]
+triggers_pt: ["resuma este vídeo do youtube", "transcrição do youtube", "extraia este vídeo", "youtube para o bundle", "assista a este vídeo", "o que aparece neste vídeo"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/youtube [url] [--visual]`:

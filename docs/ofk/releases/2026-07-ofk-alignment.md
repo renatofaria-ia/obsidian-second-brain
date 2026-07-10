@@ -189,6 +189,25 @@ Validacao desta rodada:
 - `python -m pytest tests/test_smoke.py`
 - resultado: `29 passed`
 
+## Atualizacao de 2026-07-10 - polimento editorial final do README
+
+Escopo desta passada:
+
+- homogeneizacao do tom do `README.md` apos a restauracao de conteudo
+- preservacao integral do contrato tecnico **OKF-first** sem nova mudanca semantica
+- limpeza de trechos metalinguisticos e ajuste de vocabulario para narrativa mais uniforme
+
+Ajustes aplicados no arquivo:
+
+- [../../../README.md](C:/Users/konok/Documents/vibecode/second-brain/README.md)
+
+Resultados desta passada:
+
+- a secao `O que acontece quando voce instala` deixa de falar sobre si mesma e volta a descrever diretamente a experiencia de uso
+- a narrativa geral fica mais uniforme entre posicionamento, exemplos praticos, arquitetura e filosofia
+- termos como `cross-platform` foram alinhados para `multiplataforma` quando nao eram tecnicamente obrigatorios
+- o conteudo restaurado do README foi preservado, sem nova compressao editorial
+
 ## Validacao executada
 
 Validacoes mecanicas:
@@ -270,3 +289,98 @@ Validacao desta rodada:
 - `bash scripts/build.sh`
 - `python -m pytest tests/test_smoke.py -q`
 - resultado: `30 passed`
+
+
+## Atualizacao de 2026-07-10 - gatilhos em pt-BR e rebuild dos adapters
+
+Escopo desta rodada:
+
+- adicionar `triggers_pt` primeiro aos comandos prioritarios e depois expandir a cobertura para todos os 45 comandos do repositorio
+- habilitar uma camada explicita de invocacao em linguagem natural pt-BR sem mudar os nomes publicos dos comandos
+- rebuildar os adapters para propagar a nova lingua aos dispatchers gerados
+- registrar a mudanca no release tecnico, mantendo a regra de rastreabilidade do fork
+
+Arquivos ajustados nesta rodada:
+
+- [../../../commands/create-command.md](C:/Users/konok/Documents/vibecode/second-brain/commands/create-command.md)
+- [../../../commands/idea-discovery.md](C:/Users/konok/Documents/vibecode/second-brain/commands/idea-discovery.md)
+- [../../../commands/notebooklm.md](C:/Users/konok/Documents/vibecode/second-brain/commands/notebooklm.md)
+- [../../../commands/obsidian-architect.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-architect.md)
+- [../../../commands/obsidian-board-hygiene.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-board-hygiene.md)
+- [../../../commands/obsidian-board.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-board.md)
+- [../../../commands/obsidian-calendar.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-calendar.md)
+- [../../../commands/obsidian-capture.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-capture.md)
+- [../../../commands/obsidian-catchup.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-catchup.md)
+- [../../../commands/obsidian-challenge.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-challenge.md)
+- [../../../commands/obsidian-connect.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-connect.md)
+- [../../../commands/obsidian-daily.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-daily.md)
+- [../../../commands/obsidian-decide.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-decide.md)
+- [../../../commands/obsidian-distill.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-distill.md)
+- [../../../commands/obsidian-emerge.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-emerge.md)
+- [../../../commands/obsidian-export.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-export.md)
+- [../../../commands/obsidian-find.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-find.md)
+- [../../../commands/obsidian-graduate.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-graduate.md)
+- [../../../commands/obsidian-health.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-health.md)
+- [../../../commands/obsidian-ingest.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-ingest.md)
+- [../../../commands/obsidian-init.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-init.md)
+- [../../../commands/obsidian-learn.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-learn.md)
+- [../../../commands/obsidian-log.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-log.md)
+- [../../../commands/obsidian-panel.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-panel.md)
+- [../../../commands/obsidian-person.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-person.md)
+- [../../../commands/obsidian-project.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-project.md)
+- [../../../commands/obsidian-projects.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-projects.md)
+- [../../../commands/obsidian-recap.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-recap.md)
+- [../../../commands/obsidian-reconcile.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-reconcile.md)
+- [../../../commands/obsidian-recurring.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-recurring.md)
+- [../../../commands/obsidian-retrieval-eval.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-retrieval-eval.md)
+- [../../../commands/obsidian-review.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-review.md)
+- [../../../commands/obsidian-save.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-save.md)
+- [../../../commands/obsidian-synthesize.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-synthesize.md)
+- [../../../commands/obsidian-task.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-task.md)
+- [../../../commands/obsidian-visualize.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-visualize.md)
+- [../../../commands/obsidian-world.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-world.md)
+- [../../../commands/podcast.md](C:/Users/konok/Documents/vibecode/second-brain/commands/podcast.md)
+- [../../../commands/research-deep.md](C:/Users/konok/Documents/vibecode/second-brain/commands/research-deep.md)
+- [../../../commands/research.md](C:/Users/konok/Documents/vibecode/second-brain/commands/research.md)
+- [../../../commands/vault-deep-synthesis.md](C:/Users/konok/Documents/vibecode/second-brain/commands/vault-deep-synthesis.md)
+- [../../../commands/x-pulse.md](C:/Users/konok/Documents/vibecode/second-brain/commands/x-pulse.md)
+- [../../../commands/x-read.md](C:/Users/konok/Documents/vibecode/second-brain/commands/x-read.md)
+- [../../../commands/youtube.md](C:/Users/konok/Documents/vibecode/second-brain/commands/youtube.md)
+- [../../../CONTRIBUTING.md](C:/Users/konok/Documents/vibecode/second-brain/CONTRIBUTING.md)
+- [../../../tests/test_smoke.py](C:/Users/konok/Documents/vibecode/second-brain/tests/test_smoke.py)
+- [../../../CHANGELOG.md](C:/Users/konok/Documents/vibecode/second-brain/CHANGELOG.md)
+
+Resultados consolidados desta rodada:
+
+- todos os comandos agora expoem `triggers_pt` no frontmatter, com frases naturais em pt-BR alinhadas ao comportamento publico ja existente
+- os cinco comandos prioritarios passam a aceitar tambem gatilhos explicitos em pt-BR no mesmo modelo usado antes apenas para `triggers_en`
+- os dispatchers gerados por adapter passam a poder renderizar uma secao dedicada a `portugues (`pt`)` sem mudanca de arquitetura, apenas pelo preenchimento dos frontmatters
+- `create-command.md` passa a ensinar `triggers_pt` tambem no template de comando novo, reduzindo regressao futura para comandos criados no fork
+- `CONTRIBUTING.md` passa a tratar `triggers_pt` como implementacao de referencia para idioma nao ingles e documenta que a cobertura portuguesa ja existe em todos os comandos
+- o smoke agora trava a presenca dos gatilhos pt-BR no skill gerado do `codex-cli` e rejeita `?` em qualquer linha `triggers_pt:`, evitando regressao de propagacao ou de codificacao
+
+Validacao desta rodada:
+
+- `bash scripts/build.sh`
+- `python -m pytest tests/test_smoke.py -q`
+- verificacao de cobertura: `45` arquivos de comando com `triggers_pt`
+
+
+## Atualizacao de 2026-07-10 - restauracao editorial do README
+
+Escopo desta rodada:
+
+- restaurar no `README.md` parte do valor demonstrativo que havia sido comprimido na reescrita OKF-first
+- preservar o contrato tecnico do fork, mas recuperar cenarios praticos importantes do README original
+- explicitar que pesquisa, automacoes e manutencao continuam existindo como extensoes documentadas do fork
+
+Arquivos ajustados nesta rodada:
+
+- [../../../README.md](C:/Users/konok/Documents/vibecode/second-brain/README.md)
+- [../../../docs/ofk/releases/2026-07-ofk-alignment.md](C:/Users/konok/Documents/vibecode/second-brain/docs/ofk/releases/2026-07-ofk-alignment.md)
+
+Resultados consolidados desta rodada:
+
+- a secao `O que acontece quando voce instala` volta a cobrir casos de uso praticos que haviam sumido, incluindo manutencao noturna, `x-read`, `x-pulse`, `research`, `research-deep` e `youtube`
+- a tabela `Antes e depois` volta a mostrar com mais clareza o ganho operacional do projeto em pesquisa, leitura social, rotina noturna e ingestao multimodal
+- o README continua OKF-first, mas deixa de reduzir o projeto apenas ao contrato persistido e volta a comunicar melhor a experiencia do produto

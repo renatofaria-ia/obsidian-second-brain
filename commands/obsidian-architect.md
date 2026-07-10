@@ -2,6 +2,7 @@
 description: Scan a codebase and write a maintained set of architecture notes into the vault - overview, per-module notes, key decisions. Re-run to refresh without clobbering your edits
 category: meta
 triggers_en: ["document this codebase", "architect this project", "map this code into my vault", "generate architecture notes", "refresh architecture docs"]
+triggers_pt: ["documente este código", "arquitete este projeto", "mapeie este código no bundle", "gere notas de arquitetura", "atualize a documentação de arquitetura"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-architect [path-to-codebase]`:

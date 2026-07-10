@@ -2,6 +2,7 @@
 description: Scan your bundle and generate an OKF-first root index, root log, and optional _CLAUDE.md extension
 category: meta
 triggers_en: ["init vault", "bootstrap vault", "setup vault", "scan vault"]
+triggers_pt: ["inicialize o bundle", "bootstrap do bundle", "configure o bundle", "escaneie o bundle"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/obsidian-init`:

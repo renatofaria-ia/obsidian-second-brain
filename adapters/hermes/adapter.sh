@@ -65,23 +65,29 @@ _hermes_version() {
 _hermes_emit_skills() {
   local src="$1" dst="$2"
   [[ -d "$src" ]] || return 0
-  local f name desc triggers category out trig_clean
+  local f name desc triggers_en triggers_pt category out trig_clean
   for f in "$src"/*.md; do
     [[ -f "$f" ]] || continue
     should_include "$f" "$HERMES_PLATFORM" || continue
 
     name="$(basename "$f" .md)"
     desc="$(parse_frontmatter "$f" description)"
-    triggers="$(parse_frontmatter "$f" triggers_en)"
+    triggers_en="$(parse_frontmatter "$f" triggers_en)"
+    triggers_pt="$(parse_frontmatter "$f" triggers_pt)"
     category="$(parse_frontmatter "$f" category)"
     [[ -z "$category" ]] && category="misc"
     [[ -z "$desc" ]] && desc="Run the $name command of the obsidian-second-brain skill."
 
+    local trig_parts=()
     trig_clean=""
-    if [[ -n "$triggers" ]]; then
-      trig_clean="$(echo "$triggers" | tr -d '[]"' | sed 's/,/, /g; s/  */ /g; s/^ *//; s/ *$//')"
-      [[ -n "$trig_clean" ]] && desc="$desc Triggers: $trig_clean."
+    if [[ -n "$triggers_en" ]]; then
+      trig_parts+=("$(echo "$triggers_en" | tr -d '[]"' | sed 's/,/, /g; s/  */ /g; s/^ *//; s/ *$//')")
     fi
+    if [[ -n "$triggers_pt" ]]; then
+      trig_parts+=("PT-BR: $(echo "$triggers_pt" | tr -d '[]"' | sed 's/,/, /g; s/  */ /g; s/^ *//; s/ *$//')")
+    fi
+    trig_clean="$(printf "%s\n" "${trig_parts[@]}" | sed '/^$/d' | paste -sd '; ' -)"
+    [[ -n "$trig_clean" ]] && desc="$desc Triggers: $trig_clean."
 
     mkdir -p "$dst/$category/$name"
     out="$dst/$category/$name/SKILL.md"

@@ -2,6 +2,7 @@
 description: Create a new obsidian-second-brain command via interview - zero markdown editing required
 category: meta
 triggers_en: ["create command", "new command", "add a command", "scaffold a command"]
+triggers_pt: ["crie um comando", "novo comando", "adicione um comando", "gere um comando"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/create-command $ARGUMENTS`:
@@ -120,6 +121,7 @@ Build the new command file. The exact format MUST be:
 description: <one-line, sentence-case, ends without period>
 category: <vault | thinking | research | meta>
 triggers_en: ["<trigger 1>", "<trigger 2>", "<trigger 3>"]
+triggers_pt: ["<gatilho 1>", "<gatilho 2>", "<gatilho 3>"]
 ---
 
 Use the obsidian-second-brain skill. Execute `/<name> $ARGUMENTS`:
