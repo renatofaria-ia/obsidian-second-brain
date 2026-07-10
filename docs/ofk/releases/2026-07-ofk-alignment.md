@@ -182,6 +182,7 @@ Resultados consolidados desta rodada:
 Complemento desta rodada:
 
 - `CHANGELOG.md` foi sincronizado com um resumo publico das fases OKF-first ja fechadas: contrato persistido, comandos prioritarios, runtime de links/export e regra de rastreabilidade via release tecnico
+- `CONTRIBUTING.md` foi ajustado apos a remocao de `SECURITY.md` para eliminar um link de contato que passaria a ficar quebrado na raiz do projeto
 
 Validacao desta rodada:
 

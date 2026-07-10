@@ -230,7 +230,7 @@ uv run -m scripts.research.x_read "https://x.com/some/post"
 - **Questions about how to use a command:** [Discussions Q&A](https://github.com/eugeniughelbur/obsidian-second-brain/discussions/categories/q-a)
 - **Showcase your vault setup:** [Discussions Show & Tell](https://github.com/eugeniughelbur/obsidian-second-brain/discussions/categories/show-and-tell)
 - **Bugs:** [bug report form](https://github.com/eugeniughelbur/obsidian-second-brain/issues/new?template=bug_report.yml)
-- **Direct contact (private / security):** see [SECURITY.md](SECURITY.md) (when added) or DM [@eugeniu_ghelbur](https://x.com/eugeniu_ghelbur)
+- **Direct contact (private):** DM [@eugeniu_ghelbur](https://x.com/eugeniu_ghelbur)
 
 ---
 
