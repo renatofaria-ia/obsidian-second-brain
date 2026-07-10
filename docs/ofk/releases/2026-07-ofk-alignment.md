@@ -197,7 +197,7 @@ Validacoes mecanicas:
 - `git diff --check`
 - varreduras locais para garantir ausencia dos padroes antigos mais criticos:
   - `mandatory wikilinks`
-  - `Read _CLAUDE.md first`
+  - instrucao de leitura primaria de `_CLAUDE.md`
   - instrucoes normativas com `[[wikilink]]`
 
 Smoke checks funcionais executados manualmente:
@@ -230,3 +230,43 @@ Observacao:
 - [../canonical-bundle.md](C:/Users/konok/Documents/vibecode/second-brain/docs/ofk/canonical-bundle.md) registra **qual e o contrato**.
 - [../test-scenarios.md](C:/Users/konok/Documents/vibecode/second-brain/docs/ofk/test-scenarios.md) registra **como validar**.
 - [../command-matrix.md](C:/Users/konok/Documents/vibecode/second-brain/docs/ofk/command-matrix.md) registra **como os 44 comandos foram classificados**.
+
+
+## Atualizacao de 2026-07-10 - hooks, adapters e superficies residuais
+
+Escopo desta rodada:
+
+- fechamento das superficies secundarias que ainda reintroduziam o contrato antigo em hooks, adapter, exemplos e docs de manutencao
+- consolidacao de `index.md` como porta de entrada canonica tambem nos fluxos automatizados
+- adicao de testes de regressao semantica para evitar retorno de `_CLAUDE.md` como requisito ou de `[[wikilinks]]` como formato obrigatorio
+- rebuild completo dos targets para confirmar propagacao do posicionamento **OKF-first**
+
+Arquivos ajustados nesta rodada:
+
+- [../../../hooks/load_vault_context.py](C:/Users/konok/Documents/vibecode/second-brain/hooks/load_vault_context.py)
+- [../../../hooks/obsidian-bg-agent.sh](C:/Users/konok/Documents/vibecode/second-brain/hooks/obsidian-bg-agent.sh)
+- [../../../hooks/obsidian-hermes-session-end.sh](C:/Users/konok/Documents/vibecode/second-brain/hooks/obsidian-hermes-session-end.sh)
+- [../../../adapters/pi/adapter.sh](C:/Users/konok/Documents/vibecode/second-brain/adapters/pi/adapter.sh)
+- [../../../commands/create-command.md](C:/Users/konok/Documents/vibecode/second-brain/commands/create-command.md)
+- [../../../commands/podcast.md](C:/Users/konok/Documents/vibecode/second-brain/commands/podcast.md)
+- [../../../CLAUDE.md](C:/Users/konok/Documents/vibecode/second-brain/CLAUDE.md)
+- [../../../architecture.md](C:/Users/konok/Documents/vibecode/second-brain/architecture.md)
+- [../../../examples/README.md](C:/Users/konok/Documents/vibecode/second-brain/examples/README.md)
+- [../../../tests/test_smoke.py](C:/Users/konok/Documents/vibecode/second-brain/tests/test_smoke.py)
+- [../../../CHANGELOG.md](C:/Users/konok/Documents/vibecode/second-brain/CHANGELOG.md)
+
+Resultados consolidados desta rodada:
+
+- `load_vault_context.py` deixa de depender de `_CLAUDE.md` para funcionar e passa a carregar `index.md` como contexto principal do bundle, usando `_CLAUDE.md` apenas quando presente como extensao opcional
+- os prompts headless de `obsidian-bg-agent.sh` e `obsidian-hermes-session-end.sh` passam a ancorar primeiro em `index.md`, eliminando a suposicao de que `_CLAUDE.md` e sempre o ponto de entrada
+- o adapter Pi passa a gerar um skill que ensina leitura de `index.md` primeiro, usa links Markdown relativos como formato interno canonico e manda rodar `/obsidian-init` pela ausencia de `index.md`, nao pela ausencia de `_CLAUDE.md`
+- `create-command.md` e `podcast.md` deixam de propagar linguagem antiga sobre `wikilinks` obrigatorios e passam a gerar/comunicar comandos com contrato alinhado ao bundle **OKF-first**
+- `CLAUDE.md`, `architecture.md` e `examples/README.md` passam a separar com mais rigor o bundle persistido do contexto Obsidian-native e a enquadrar o sample vault como exemplo de compatibilidade legada, nao como layout canonico do fork
+- os targets foram rebuildados apos os ajustes nas fontes para confirmar a propagacao do novo posicionamento
+- o smoke recebe duas travas novas: o hook de contexto agora e validado com bundle que tem `index.md` e nao tem `_CLAUDE.md`, e o build do Pi agora falha se o skill gerado voltar a exigir `_CLAUDE.md` ou `[[wikilinks]]` obrigatorios
+
+Validacao desta rodada:
+
+- `bash scripts/build.sh`
+- `python -m pytest tests/test_smoke.py -q`
+- resultado: `30 passed`

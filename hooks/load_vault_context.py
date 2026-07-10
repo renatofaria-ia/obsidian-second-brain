@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SessionStart hook: inject _CLAUDE.md into context once per session.
+"""SessionStart hook: inject bundle context into the session once per start.
 
 Gated to the AI-Brain vault: fires only when the session's cwd is inside
 $OBSIDIAN_VAULT_PATH. Skips silently otherwise (any output would land in
@@ -51,30 +51,48 @@ def main() -> int:
     if not (cwd_n == vault_n or cwd_n.startswith(vault_n + "/")):
         return 0
 
-    claude_md = Path(vault) / "_CLAUDE.md"
-    if not claude_md.is_file():
+    v = Path(vault)
+    index_md = v / "index.md"
+    claude_md = v / "_CLAUDE.md"
+    log_md = v / "log.md"
+
+    if not index_md.is_file() and not claude_md.is_file():
         return 0
 
-    content = claude_md.read_text(encoding="utf-8")
+    sections: list[str] = []
+    key_lines = [f"  - `{index_md}` - canonical bundle entrypoint"]
 
-    v = Path(vault)
+    if log_md.is_file():
+        key_lines.append(f"  - `{log_md}` - canonical operation log")
+    if claude_md.is_file():
+        key_lines.append(f"  - `{claude_md}` - optional local runtime extension")
+
+    if index_md.is_file():
+        sections.append(
+            "Bundle index (`index.md`, loaded once at session start - do not re-read on "
+            "each command unless the bundle changes):\n\n"
+            + index_md.read_text(encoding="utf-8")
+        )
+    if claude_md.is_file():
+        sections.append(
+            "Bundle extension (`_CLAUDE.md`, optional local runtime guidance):\n\n"
+            + claude_md.read_text(encoding="utf-8")
+        )
+
     header = (
         f"**Vault root**: `{vault}`\n"
         f"**Key files** (absolute paths - use these directly, no discovery needed):\n"
-        f"  - `{v / '_CLAUDE.md'}` - this operating manual (already loaded)\n"
-        f"  - `{v / 'index.md'}` - navigation hub\n"
-        f"  - `{v / 'log.md'}` - operation log\n"
+        + "\n".join(key_lines)
+        + "\n"
         "**Do NOT run `ls`, `Glob`, or `Bash` to discover the vault or its folders.**\n"
-        "Use the vault root path above and the folder names from the manual below directly.\n\n"
+        "Use the vault root path above and the bundle files below directly.\n\n"
         "---\n\n"
-        "Vault operating manual (_CLAUDE.md, loaded once at session start "
-        "by the load_vault_context hook - do not re-read on each command):\n\n"
     )
 
     output = {
         "hookSpecificOutput": {
             "hookEventName": "SessionStart",
-            "additionalContext": header + content,
+            "additionalContext": header + "\n\n---\n\n".join(sections),
         }
     }
     json.dump(output, sys.stdout)

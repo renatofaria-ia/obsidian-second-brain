@@ -124,17 +124,20 @@ and this discovery skill (`/skill:obsidian-second-brain`).
 
 ## How to operate
 
-1. Read `_CLAUDE.md` in the vault root, if it exists, to learn the user's vault
-   conventions.
+1. Read `index.md` in the bundle root first, if it exists, because it is the
+   canonical entrypoint. If `_CLAUDE.md` also exists, treat it as an optional
+   extension that may refine local conventions.
 2. When the user types a prompt template like `/obsidian-save`, follow its
    instructions step by step.
 3. Treat the AI-first vault rule
    (`./references/ai-first-rules.md`) as non-negotiable for every note you
    write: `## For future Claude` preamble, rich frontmatter
-   (`type`, `date`, `tags`, `ai-first: true`), `[[wikilinks]]` for every
-   person/project/concept, recency markers per external claim, sources verbatim,
-   confidence levels where applicable.
-4. If `_CLAUDE.md` is missing, run `/obsidian-init` to generate it.
+   (`type`, `date`, `tags`, `ai-first: true`), relative Markdown links as the
+   canonical internal format, `[[wikilinks]]` only as compatibility for
+   Obsidian-native bundles, recency markers per external claim, sources
+   verbatim, and confidence levels where applicable.
+4. If `index.md` is missing, run `/obsidian-init` to generate the canonical
+   root files for the bundle.
 
 ## Command routing table
 EOF

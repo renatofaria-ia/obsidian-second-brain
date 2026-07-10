@@ -48,7 +48,7 @@ INTERRUPTED=$(printf '%s' "$INPUT" | jq -r '.extra.interrupted // false' 2>/dev/
 SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null || echo "unknown")
 TODAY=$(date +%Y-%m-%d)
 
-PROMPT="Read _CLAUDE.md at the vault root and follow its rules exactly. Run the \
+PROMPT="Read index.md at the vault root first as the canonical bundle entrypoint. If _CLAUDE.md exists, treat it as an optional extension that may refine local conventions. Run the \
 obsidian-nightly consolidation pass for VAULT=$VAULT (TODAY=$TODAY): close the \
 day, reconcile conflicting entity/concept claims, synthesize cross-source \
 patterns, heal orphan links, rebuild index.md, and append a line to log.md. \

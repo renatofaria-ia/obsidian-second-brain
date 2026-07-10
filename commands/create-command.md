@@ -89,7 +89,7 @@ Use the answer as the spine of the command body.
 Ask via AskUserQuestion (single-select):
 
 > "Does this command write notes to the user's Obsidian vault?"
-> - `yes` - output must apply the AI-first rule (frontmatter, preamble, wikilinks)
+> - `yes` - output must apply the AI-first rule (frontmatter, preamble, canonical internal links)
 > - `no` - read-only, informational, or external-write only
 
 If `yes`: the generated command body MUST end with the AI-first rule footer (see Phase 8).
@@ -126,7 +126,7 @@ Use the obsidian-second-brain skill. Execute `/<name> $ARGUMENTS`:
 
 <one-sentence framing tying the user's intent (Phase 1) to the action>
 
-1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an extension file that may refine local conventions
+1. Read `index.md` first if it exists in the bundle root. If `_CLAUDE.md` exists, treat it as an optional extension file that may refine local conventions
 2. <step from Phase 5, step 1>
 3. <step from Phase 5, step 2>
 4. <step from Phase 5, step 3>
@@ -138,7 +138,7 @@ Use the obsidian-second-brain skill. Execute `/<name> $ARGUMENTS`:
 ---
 
 <AI-first footer ONLY if Phase 6 = yes>
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` — `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval — not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md` - `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal format, `[[wikilinks]]` only as a compatibility extension when the surrounding bundle still uses them, sources preserved verbatim with URLs inline, and confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 ```
 
 Write the file to `commands/<name>.md` using the Write tool.

@@ -136,14 +136,52 @@ def test_pi_build_generates_package():
 
     skill = REPO_ROOT / "dist/pi/.pi/skills/obsidian-second-brain/SKILL.md"
     assert skill.is_file()
-    skill_head = skill.read_text(encoding="utf-8")[:400]
+    skill_text = skill.read_text(encoding="utf-8")
+    skill_head = skill_text[:400]
     assert "name: obsidian-second-brain" in skill_head
     assert "description:" in skill_head
+    assert "Read `index.md` in the bundle root first" in skill_text
+    assert "If `index.md` is missing, run `/obsidian-init`" in skill_text
+    assert "If `_CLAUDE.md` is missing, run `/obsidian-init`" not in skill_text
+    assert "mandatory `[[wikilinks]]`" not in skill_text
 
     # Paths should be rewritten for the Pi layout, not left pointing at Claude.
     prompt_body = prompt.read_text(encoding="utf-8")
     assert "~/.claude/skills/obsidian-second-brain" not in prompt_body
     assert ".pi/skills/obsidian-second-brain" in prompt_body
+
+
+def test_load_vault_context_supports_index_without_claude(tmp_path):
+    """The SessionStart hook must load bundle context from index.md even when
+    the bundle has no _CLAUDE.md extension file."""
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    (vault / "index.md").write_text(
+        '---\ntype: index\nokf_version: "0.1"\n---\n# Root\n',
+        encoding="utf-8",
+    )
+    (vault / "log.md").write_text('# Log\n', encoding="utf-8")
+
+    env = os.environ.copy()
+    env["OBSIDIAN_VAULT_PATH"] = str(vault)
+    result = subprocess.run(
+        [sys.executable, "hooks/load_vault_context.py"],
+        cwd=REPO_ROOT,
+        input=json.dumps({"cwd": str(vault)}),
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    ctx = payload["hookSpecificOutput"]["additionalContext"]
+    assert "canonical bundle entrypoint" in ctx
+    assert "# Root" in ctx
+    assert "optional local runtime extension" not in ctx
 
 
 def test_vault_health_json_reports_clean_markdown_linked_vault(tmp_path):

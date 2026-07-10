@@ -31,7 +31,7 @@ Use the obsidian-second-brain skill. Execute `/podcast [url]`:
 
 4. Show the script output verbatim to the user.
 
-5. **Default save behavior: saves automatically.** AI-first note written to `Research/Podcasts/YYYY-MM-DD — <episode-title-slug>.md` (em-dash separator, matches the existing `/youtube` and `/research` filename pattern). Frontmatter includes `show`, `host`, `episode-title`, `episode-url`, `feed-url`, `guid`, `published`, `duration`, `transcript-source` (one of `rss-transcript-tag` / `whisper-api` / `show-notes`), and tags.
+5. **Default save behavior: saves automatically.** AI-first note written to `Research/Podcasts/YYYY-MM-DD - <episode-title-slug>.md`. Frontmatter includes `show`, `host`, `episode-title`, `episode-url`, `feed-url`, `guid`, `published`, `duration`, `transcript-source` (one of `rss-transcript-tag` / `whisper-api` / `show-notes`), and tags.
 
 6. Plain English triggers: "summarize this podcast", "what's in this episode", "transcribe this podcast", or just pasting an Apple Podcasts URL with a question about content.
 
@@ -41,6 +41,6 @@ Use the obsidian-second-brain skill. Execute `/podcast [url]`:
 
 ---
 
-**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md`. That means: `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, mandatory `[[wikilinks]]` for every person/project/concept referenced, sources preserved verbatim with URLs inline, and confidence levels where applicable. The vault is for future-Claude retrieval, not human reading.
+**AI-first rule:** Every note created or updated by this command MUST follow `references/ai-first-rules.md`. That means: `## For future Claude` preamble, rich frontmatter (`type`, `date`, `tags`, `ai-first: true`, plus type-specific fields), recency markers per external claim, relative Markdown links as the canonical internal format, `[[wikilinks]]` only as a compatibility extension when the surrounding bundle still uses them, sources preserved verbatim with URLs inline, and confidence levels where applicable. The persisted bundle is for future-Claude retrieval, not for human reading first.
 
 **Anti-fabrication:** Search exhaustively before claiming any note, person, or file is absent - false absence is the most common failure mode - and never invent facts, entities, or dates (mark unknowns as `TBD`). See the anti-fabrication and search-completeness hard rules in `references/ai-first-rules.md`.

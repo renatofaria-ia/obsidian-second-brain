@@ -60,7 +60,7 @@ printf '%s\n\n' "$SUMMARY" >> "$PROMPT_FILE"
 
 cat >> "$PROMPT_FILE" << 'INSTRUCTIONS'
 INSTRUCTIONS:
-1. Read _CLAUDE.md at the vault root first - follow its rules exactly. Where silent, use defaults.
+1. Read index.md at the vault root first as the canonical bundle entrypoint. If _CLAUDE.md also exists, treat it as an optional extension that may refine local conventions. Where both are silent, use the skill defaults.
 2. Identify all vault-worthy items in the summary:
    - Decisions made or confirmed
    - Tasks created, assigned, or completed

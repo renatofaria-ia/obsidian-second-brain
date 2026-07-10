@@ -2,9 +2,9 @@
 
 Operating instructions for Claude Code when working inside this repo.
 
-This is the source repo for **obsidian-second-brain**, a Claude Code skill that turns any Obsidian vault into a living AI-first second brain. The skill ships 44 slash commands across 4 layers (vault management, thinking tools, research toolkit, scheduled agents).
+This is the source repo for **obsidian-second-brain**, a Claude Code skill that turns an Obsidian-backed knowledge bundle into a living AI-first second brain. The skill ships 44 slash commands across 4 layers (vault management, thinking tools, research toolkit, scheduled agents).
 
-If you are Claude operating on a user's vault, you want `_CLAUDE.md` inside their vault, not this file. This file is for working on the skill's source code.
+If you are Claude operating on a user's bundle, read `index.md` first and then any optional extension files such as `_CLAUDE.md` inside that bundle, not this file. This file is for working on the skill's source code.
 
 ## Repo layout
 
@@ -28,11 +28,11 @@ Source files in `commands/` use Claude Code's slash-command shape. The Claude Co
 
 ## The AI-first rule (non-negotiable)
 
-Every command that writes to a user's vault MUST follow `references/ai-first-rules.md`. Vault notes are designed for **future-Claude retrieval**, not human reading. This means:
+Every command that writes to a user's bundle MUST follow `references/ai-first-rules.md`. The persisted bundle is designed for **future-Claude retrieval**, not human reading first. This means:
 
 - A `## For future Claude` preamble at the top of every note
 - Rich frontmatter: `type`, `date`, `tags`, `ai-first: true`, plus type-specific fields
-- `[[wikilinks]]` for every person, project, idea, decision referenced
+- Relative Markdown links as the canonical internal format; preserve `[[wikilinks]]` only when the surrounding bundle still relies on them
 - External claims carry recency markers like `(as of 2026-04, source.com)`
 - Source URLs preserved verbatim inline
 - Confidence levels where applicable (`stated | high | medium | speculation`)
@@ -84,7 +84,7 @@ If you change an adapter's output layout, update the matching assertion in `test
 
 ## What not to do
 
-- Do not rewrite vault output to be "more human-friendly." The vault is for future-Claude, not human readers.
+- Do not rewrite persisted bundle output to be "more human-friendly." The bundle is for future-Claude retrieval, not human readers first.
 - Do not strip frontmatter or `## For future Claude` preambles from existing commands.
 - Do not add emojis to command files or vault output (unless explicitly part of a UI element like a kanban column emoji).
 - Do not invent rates, dates, or relationships when writing project notes - mark unknowns as `TBD`.

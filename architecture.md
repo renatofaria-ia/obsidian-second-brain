@@ -1,6 +1,6 @@
 # obsidian-second-brain - architecture
 
-How the layers fit together. This document describes the system: its components, how they connect, and how data flows from a slash command to a vault note. For the per-command operating manual see `SKILL.md`; for the contributor rules see `CLAUDE.md`.
+How the layers fit together. This document describes the system: its components, how they connect, and how data flows from a slash command to a bundle note. For the per-command operating manual see `SKILL.md`; for the contributor rules see `CLAUDE.md`.
 
 Last reviewed against commit `ff0319c` (2026-06-05).
 
@@ -16,7 +16,7 @@ obsidian-second-brain is a cross-CLI **skill** (not a plugin, not a hosted servi
 - An opt-in background agent plus optional user-scheduled agents.
 - MIT licensed.
 
-The AI-first vault rule ties it all together: every note a command writes is designed for future-Claude retrieval, not human reading. The canonical spec is `references/ai-first-rules.md`, referenced from `_CLAUDE.md` Section 0 and from every command that writes to the vault.
+The AI-first writing rule ties it all together: every note a command writes is designed for future-Claude retrieval, not human reading first. The canonical spec is `references/ai-first-rules.md`, referenced from the command set and available bundle extensions such as `_CLAUDE.md`.
 ## Fork direction: OKF alignment
 
 This fork is standardizing the persisted knowledge layer on **OKF 0.1** while preserving the current command names during the first migration phase.
@@ -55,7 +55,7 @@ The migration is already underway beyond phase-0 documentation: `/obsidian-save`
 | `hooks/` | Claude Code hooks: AI-first write validation, session-start context injection, opt-in background agent. |
 | `dist/` | Build output, one tree per platform. Gitignored. Regenerate with `scripts/build.sh`. |
 | `tests/` | Smoke tests and fixtures, run in CI. |
-| `examples/sample-vault/` | Fictional AI-first notes that show what good output looks like. |
+| `examples/sample-vault/` | Fictional AI-first notes that show a legacy Obsidian-native compatibility layout. |
 | `SKILL.md` | Full operating manual loaded when the skill activates. |
 | `architecture.md` | This document. |
 | `README.md` | Public-facing docs on github.com. |
@@ -159,7 +159,7 @@ Python dependencies (`pyproject.toml`, managed via `uv`): `openai`, `requests`, 
 Hooks enforce the rules mechanically instead of relying on the model to remember them. They are Claude Code specific - the other CLIs have no hook system, so there the AI-first rule rests on the in-body command instructions.
 
 - **`validate-ai-first.sh`** (`PostToolUse` on Write/Edit). Warns when a vault markdown write is missing AI-first frontmatter or the `## For future Claude` preamble. Check 5 is the substitution-character gate (em-dash, curly quotes, Unicode math).
-- **`load_vault_context.py`** (`SessionStart`). Injects `_CLAUDE.md` / `index.md` / recent log once per session so commands do not re-read the operating manual every turn.
+- **`load_vault_context.py`** (`SessionStart`). Injects `index.md` first and then optional root extension files such as `_CLAUDE.md` once per session so commands do not rediscover the bundle every turn.
 - **`obsidian-bg-agent.sh`** (`PostCompact`, opt-in). On context compaction it spawns a headless `claude -p` in the vault to propagate the session summary into notes. Ships inert; arms only with `OBSIDIAN_BG_AGENT_ENABLED=1`. It only adds or updates - never deletes, archives, or merges.
 
 ---

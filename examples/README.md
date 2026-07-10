@@ -1,6 +1,6 @@
 # Sample vault
 
-This folder shows what an obsidian-second-brain vault looks like in practice. Every note inside `sample-vault/` follows the AI-first rule defined in [`references/ai-first-rules.md`](../references/ai-first-rules.md).
+This folder shows what an obsidian-second-brain bundle can look like in practice when stored in an Obsidian-style layout. Every note inside `sample-vault/` follows the AI-first rule defined in [`references/ai-first-rules.md`](../references/ai-first-rules.md), but this sample should be read as a legacy Obsidian-native compatibility example, not as the canonical OKF-first bundle layout of the fork.
 
 If you are evaluating the skill, browse the files here before installing. If you are contributing a new command, match the structure shown in the note type closest to your output.
 
@@ -37,7 +37,7 @@ Everything here is fictional. **Alex Rivera**, **Sam Patel**, **Tide**, **Curren
 
 ## How to use this for your own vault
 
-You don't copy this folder into your vault. The skill builds your vault for you when you run `/obsidian-init` and grows it through normal usage of the 45 commands. This folder exists only to show what the output looks like before you install.
+You do not copy this folder into your bundle. The skill initializes the canonical root files for you when you run `/obsidian-init` and grows the bundle through normal usage of the commands. This folder exists only to show one compatibility layout before you install.
 
 If you want a clean starting point, run:
 
@@ -45,4 +45,4 @@ If you want a clean starting point, run:
 /obsidian-init
 ```
 
-That writes a real `_CLAUDE.md` tailored to your name, your projects, and your folder preferences.
+That writes the canonical root bundle files and may also generate extension files such as `_CLAUDE.md` depending on the chosen layout.
