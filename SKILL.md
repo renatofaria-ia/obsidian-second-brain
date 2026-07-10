@@ -106,6 +106,7 @@ Before applying any local workflow rules, anchor on the bundle contract:
 4. Reserve `index.md` and `log.md`; never treat them as concept documents.
 5. Use relative Markdown links as the canonical internal link format.
 6. Treat `_CLAUDE.md`, `CRITICAL_FACTS.md`, AI-first rules, bi-temporal facts, kanban structures, and `[[wikilinks]]` as extension behavior layered on the base contract.
+7. Whenever you change the persisted contract, command semantics, migration guidance, or validation expectations, also update the applicable release record under `docs/ofk/releases/` in the same change set.
 
 ### Path resolution rule
 When command examples below mention concrete folders such as `wiki/`, `raw/`, `Daily/`, `Boards/`, `Projects/`, `People/`, `Knowledge/`, `Research/`, or `Logs/`, treat those paths as defaults or legacy layouts, not as part of the core OKF contract. Resolve actual write targets in this order:

@@ -17,6 +17,8 @@ Este diretorio fecha o contrato inicial de adaptacao do fork `renatofaria-ia/obs
 - [`test-scenarios.md`](./test-scenarios.md): cenarios de validacao para a migracao.
 - [`releases/2026-07-ofk-alignment.md`](./releases/2026-07-ofk-alignment.md): log tecnico desta rodada de adaptacao, com escopo, arquivos tocados e validacao executada.
 
+Regra operacional desta area: toda mudanca relevante no contrato OKF-first, na semantica dos comandos, no runtime do bundle ou nos cenarios de validacao deve atualizar tambem o release tecnico aplicavel em `docs/ofk/releases/` na mesma rodada.
+
 ## Fixtures
 
 - [`../../examples/ofk-bundle-minimo/`](../../examples/ofk-bundle-minimo/): bundle minimo em OKF base.

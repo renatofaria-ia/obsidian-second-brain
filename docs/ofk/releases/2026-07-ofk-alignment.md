@@ -148,6 +148,42 @@ Resultado esperado desse bloco:
 - alinhamento dos templates auxiliares ao mesmo contrato `bundle-first`
 - correcao de inconsistencias editoriais e de codificacao UTF-8 nos documentos principais
 
+## Atualizacao de 2026-07-10 - Fase 1 dos comandos prioritarios
+
+Escopo desta rodada:
+
+- fechamento da semantica **OKF-first real** dos comandos `/obsidian-save`, `/obsidian-ingest`, `/obsidian-find`, `/obsidian-init` e `/obsidian-export`
+- alinhamento do guia operacional exposto pelo MCP/runtime ao mesmo contrato desses comandos
+- reforco da rastreabilidade: mudancas relevantes agora devem atualizar tambem `docs/ofk/releases/` na mesma rodada
+
+Arquivos ajustados nesta rodada:
+
+- [../../../commands/obsidian-save.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-save.md)
+- [../../../commands/obsidian-ingest.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-ingest.md)
+- [../../../commands/obsidian-find.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-find.md)
+- [../../../commands/obsidian-init.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-init.md)
+- [../../../commands/obsidian-export.md](C:/Users/konok/Documents/vibecode/second-brain/commands/obsidian-export.md)
+- [../../../integrations/obsidian-mcp-server/vault_ops.py](C:/Users/konok/Documents/vibecode/second-brain/integrations/obsidian-mcp-server/vault_ops.py)
+- [../../../tests/test_smoke.py](C:/Users/konok/Documents/vibecode/second-brain/tests/test_smoke.py)
+- [../../../SKILL.md](C:/Users/konok/Documents/vibecode/second-brain/SKILL.md)
+- [../../../CONTRIBUTING.md](C:/Users/konok/Documents/vibecode/second-brain/CONTRIBUTING.md)
+- [../README.md](C:/Users/konok/Documents/vibecode/second-brain/docs/ofk/README.md)
+
+Resultados consolidados desta rodada:
+
+- `/obsidian-save` passa a declarar ordem canonica de persistencia: ler `index.md`, buscar conceitos existentes, atualizar antes de criar, refletir navegacao no `index.md`, registrar evento em `log.md` e so depois propagar para extensoes opcionais
+- `/obsidian-ingest` passa a tratar `raw/` como extensao documentada e fixa o ciclo fonte -> entidades/claims/acoes -> update de conceito -> sintese opcional -> `index.md` -> `log.md`
+- `/obsidian-find` passa a explicitar a precedencia de concepts canonicos sobre extensoes, `raw/` e derivados exportados
+- `/obsidian-init` consolida `index.md` e `log.md` como core obrigatorio e rebaixa `_CLAUDE.md`, `Bases/`, `Boards/`, `Templates/`, `Logs/` e `.obsidian/` para camada opcional
+- `/obsidian-export` passa a descrever `export okf` como serializacao deterministica principal, com JSON e snapshots Markdown como derivados
+- o guia exposto por `vault_ops.get_skill()` agora reforca `obsidian_update_note`, `obsidian_validate_note` e `obsidian_backlinks` como primitivas esperadas do fluxo canonico
+- a rastreabilidade de futuras mudancas relevantes passa a ser regra operacional do fork, documentada no skill, na contribuicao e na pasta `docs/ofk/`
+
+Validacao desta rodada:
+
+- `python -m pytest tests/test_smoke.py`
+- resultado: `29 passed`
+
 ## Validacao executada
 
 Validacoes mecanicas:

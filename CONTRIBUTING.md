@@ -95,6 +95,10 @@ Documentation PRs are always welcome. Specifically helpful:
 
 No issue required for typo fixes - just open a PR.
 
+### Release tracking
+
+If your change affects the OKF contract, command semantics, migration guidance, bundle structure, or validation behavior, update the relevant file under `docs/ofk/releases/` in the same PR. Treat the release note as required traceability for behavioral changes, not as optional cleanup.
+
 ### 🌍 Translating trigger phrases (multilingual support)
 
 Every command in `commands/<name>.md` declares trigger phrases per language in its frontmatter:
