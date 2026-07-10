@@ -179,6 +179,10 @@ Resultados consolidados desta rodada:
 - o guia exposto por `vault_ops.get_skill()` agora reforca `obsidian_update_note`, `obsidian_validate_note` e `obsidian_backlinks` como primitivas esperadas do fluxo canonico
 - a rastreabilidade de futuras mudancas relevantes passa a ser regra operacional do fork, documentada no skill, na contribuicao e na pasta `docs/ofk/`
 
+Complemento desta rodada:
+
+- `CHANGELOG.md` foi sincronizado com um resumo publico das fases OKF-first ja fechadas: contrato persistido, comandos prioritarios, runtime de links/export e regra de rastreabilidade via release tecnico
+
 Validacao desta rodada:
 
 - `python -m pytest tests/test_smoke.py`
