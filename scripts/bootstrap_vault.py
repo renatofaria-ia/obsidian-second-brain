@@ -222,7 +222,7 @@ def render_root_index(vault: Path, bundle_title: str) -> str:
     safe_title = bundle_title.replace('"', '\\"')
     lines = [
         '---',
-        'type: bundle',
+        'type: index',
         f'title: "{safe_title}"',
         'okf_version: "0.1"',
         '---',

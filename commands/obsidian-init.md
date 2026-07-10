@@ -16,7 +16,7 @@ Use the obsidian-second-brain skill. Execute `/obsidian-init`:
 4. Merge all agent results into a complete picture of the bundle.
 5. Generate or refresh a complete `_CLAUDE.md` using the template in `references/claude-md-template.md`, filled with real values from the bundle. `_CLAUDE.md` is an extension file, not part of the core OKF contract.
 6. Generate `index.md` at the bundle root as the canonical navigation file:
-   - add frontmatter with `okf_version: "0.1"`
+   - add frontmatter with `type: index` and `okf_version: "0.1"`
    - list concept docs and important extension files by progressive disclosure
    - never treat `index.md` or `log.md` as concept files
    - use relative Markdown links as the canonical internal link format

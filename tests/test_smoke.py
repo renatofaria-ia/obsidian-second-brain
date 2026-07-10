@@ -366,6 +366,7 @@ def test_export_okf_skips_reserved_names_and_writes_root_bundle(tmp_path):
 
     assert result.returncode == 0, result.stderr
     root_index = (out / "index.md").read_text(encoding="utf-8")
+    assert 'type: index' in root_index
     assert 'okf_version: "0.1"' in root_index
     assert (out / "log.md").read_text(encoding="utf-8") == "# Existing log\n"
     assert (out / "concepts" / "Alpha.md").is_file()
@@ -445,6 +446,7 @@ def test_bootstrap_vault_writes_okf_root_files(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     root_index = (vault / "index.md").read_text(encoding="utf-8")
     root_log = (vault / "log.md").read_text(encoding="utf-8")
+    assert 'type: index' in root_index
     assert 'okf_version: "0.1"' in root_index
     assert "# Renato Faria's Bundle" in root_index
     assert '## Root' in root_index

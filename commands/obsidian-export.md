@@ -55,13 +55,15 @@ The optional argument is the format: `json` (default), `markdown`, or `okf`.
    Do NOT build this by hand. Run the deterministic exporter:
    ```bash
    uv run scripts/export_okf.py --path "<bundle path>"
+   # fallback when dependencies are already installed in the local Python env:
+   python scripts/export_okf.py --path "<bundle path>"
    ```
    It writes an OKF-compatible bundle to `_export/okf/` with these rules:
    - every concept becomes a markdown concept doc with required `type` and generated `timestamp`
    - `index.md` and `log.md` are treated as reserved names, not concept files
    - internal `[[wikilinks]]` in the body are converted to relative Markdown links
    - extension frontmatter fields are preserved whenever possible (`ai-first`, `updated`, `timeline`, `related-projects`, etc.)
-   - a root `index.md` is generated with `okf_version: "0.1"`
+   - a root `index.md` is generated with `type: index` and `okf_version: "0.1"`
    - a root `log.md` is always emitted
 
 4. Append to the operation log: if `Logs/` exists write `**HH:MM** - export | Vault snapshot exported (format, N notes)` to `Logs/YYYY-MM-DD.md`; otherwise append `## [YYYY-MM-DD] export | Vault snapshot exported (format, N notes)` to `log.md`.

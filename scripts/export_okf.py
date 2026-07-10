@@ -213,6 +213,7 @@ def main() -> None:
 
     index_lines = [
         "---",
+        'type: index',
         'okf_version: "0.1"',
         "---",
         "",
