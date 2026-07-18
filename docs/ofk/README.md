@@ -13,9 +13,10 @@ Este diretorio fecha o contrato inicial de adaptacao do fork `renatofaria-ia/obs
 
 - [`gap-analysis.md`](./gap-analysis.md): diferencas entre o comportamento atual do upstream e a spec OKF 0.1.
 - [`canonical-bundle.md`](./canonical-bundle.md): contrato do bundle canonico deste fork.
-- [`command-matrix.md`](./command-matrix.md): classificacao dos 44 comandos em `OKF-core`, `OKF + extensao` e `Obsidian-only`.
+- [`command-matrix.md`](./command-matrix.md): classificacao dos 45 comandos em `OKF-core`, `OKF + extensao` e `Obsidian-only`.
 - [`test-scenarios.md`](./test-scenarios.md): cenarios de validacao para a migracao.
 - [`releases/2026-07-ofk-alignment.md`](./releases/2026-07-ofk-alignment.md): log tecnico desta rodada de adaptacao, com escopo, arquivos tocados e validacao executada.
+- [`releases/2026-07-notebooklm-import.md`](./releases/2026-07-notebooklm-import.md): extensao opt-in para importar um notebook pessoal do NotebookLM.
 
 Regra operacional desta area: toda mudanca relevante no contrato OKF-first, na semantica dos comandos, no runtime do bundle ou nos cenarios de validacao deve atualizar tambem o release tecnico aplicavel em `docs/ofk/releases/` na mesma rodada.
 

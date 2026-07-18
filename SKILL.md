@@ -922,7 +922,7 @@ The vault knows why it's structured the way it is - when a future session asks "
 
 ## Research Commands
 
-Seven commands that pull external knowledge into the vault - X posts, X discourse, web research with citations, vault-grounded synthesis, YouTube videos, and podcast episodes (plus `/obsidian-ingest` above for arbitrary URLs, PDFs, audio, and screenshots). All output AI-first notes per the vault's Section 0 rule (preamble, rich frontmatter, recency markers, canonical relative Markdown links, sources verbatim).
+Eight commands that pull external knowledge into the vault - X posts, X discourse, web research with citations, vault-grounded synthesis, opt-in personal NotebookLM imports, YouTube videos, and podcast episodes (plus `/obsidian-ingest` above for arbitrary URLs, PDFs, audio, and screenshots). All output AI-first notes per the vault's Section 0 rule (preamble, rich frontmatter, recency markers, canonical relative Markdown links, sources verbatim).
 
 **Setup:** API keys live at `~/.config/obsidian-second-brain/.env`. Run `install.sh` and answer "y" to the research toolkit prompt, or copy `.env.example` manually. xAI Grok and Perplexity keys are required; YouTube key is optional (transcripts work without it).
 
@@ -1021,6 +1021,20 @@ Plain English: "notebooklm this", "ask my notebook about X", "ground a research 
 
 ---
 
+### `/notebooklm-import`
+
+**Opt-in import of a personal NotebookLM notebook into an OKF bundle.** This is distinct from `/notebooklm`: it uses the local personal NotebookLM session rather than creating a vault-grounded research prompt.
+
+Steps:
+1. Confirm the notebook and the destination `.md` path inside the bundle.
+2. Confirm `notebooklm-to-notes` and the local personal NotebookLM authentication are available. Never run this flow in CI, scheduled jobs, or shared-cookie environments.
+3. Run `uv run -m scripts.research.notebooklm_import --notebook "<id>" --destination "<folder>/<file>.md"`.
+4. The importer stages the export, validates UTF-8, `type`, provenance, editorial sections, Mermaid and compatible links before writing.
+5. Report the saved note, relative `index.md` entry, `log.md` record and preserved sources. Apply `/obsidian-save` only for real relationships.
+
+Plain English: "import my NotebookLM notebook", "bring my NotebookLM notebook into the vault", "importar notebook do NotebookLM".
+
+---
 ### `/youtube [url] [--visual]`
 
 **Extract and summarize a YouTube video.** Transcript (free, no API key) + metadata + top comments (Data API v3, optional) → summarized via Grok. Add `--visual` to also *watch* the video: scene-change frame extraction Claude reads with its own vision.

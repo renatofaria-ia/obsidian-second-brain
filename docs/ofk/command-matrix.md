@@ -1,6 +1,6 @@
 # Matriz de comandos
 
-Esta matriz classifica os 44 comandos atuais segundo o contrato desta fase.
+Esta matriz classifica os 45 comandos atuais segundo o contrato desta fase.
 
 ## Criterios
 
@@ -12,7 +12,7 @@ Esta matriz classifica os 44 comandos atuais segundo o contrato desta fase.
 
 | OKF-core | OKF + extensao | Obsidian-only |
 |---|---|---|
-| `obsidian-export`<br>`obsidian-find`<br>`obsidian-health`<br>`obsidian-log` | `idea-discovery`<br>`notebooklm`<br>`obsidian-architect`<br>`obsidian-capture`<br>`obsidian-catchup`<br>`obsidian-challenge`<br>`obsidian-connect`<br>`obsidian-daily`<br>`obsidian-decide`<br>`obsidian-distill`<br>`obsidian-emerge`<br>`obsidian-graduate`<br>`obsidian-ingest`<br>`obsidian-init`<br>`obsidian-learn`<br>`obsidian-person`<br>`obsidian-project`<br>`obsidian-projects`<br>`obsidian-recap`<br>`obsidian-reconcile`<br>`obsidian-recurring`<br>`obsidian-retrieval-eval`<br>`obsidian-review`<br>`obsidian-save`<br>`obsidian-synthesize`<br>`obsidian-task`<br>`obsidian-world`<br>`podcast`<br>`research`<br>`research-deep`<br>`vault-deep-synthesis`<br>`x-pulse`<br>`x-read`<br>`youtube` | `create-command`<br>`obsidian-board`<br>`obsidian-board-hygiene`<br>`obsidian-calendar`<br>`obsidian-panel`<br>`obsidian-visualize` |
+| `obsidian-export`<br>`obsidian-find`<br>`obsidian-health`<br>`obsidian-log` | `idea-discovery`<br>`notebooklm`<br>`notebooklm-import`<br>`obsidian-architect`<br>`obsidian-capture`<br>`obsidian-catchup`<br>`obsidian-challenge`<br>`obsidian-connect`<br>`obsidian-daily`<br>`obsidian-decide`<br>`obsidian-distill`<br>`obsidian-emerge`<br>`obsidian-graduate`<br>`obsidian-ingest`<br>`obsidian-init`<br>`obsidian-learn`<br>`obsidian-person`<br>`obsidian-project`<br>`obsidian-projects`<br>`obsidian-recap`<br>`obsidian-reconcile`<br>`obsidian-recurring`<br>`obsidian-retrieval-eval`<br>`obsidian-review`<br>`obsidian-save`<br>`obsidian-synthesize`<br>`obsidian-task`<br>`obsidian-world`<br>`podcast`<br>`research`<br>`research-deep`<br>`vault-deep-synthesis`<br>`x-pulse`<br>`x-read`<br>`youtube` | `create-command`<br>`obsidian-board`<br>`obsidian-board-hygiene`<br>`obsidian-calendar`<br>`obsidian-panel`<br>`obsidian-visualize` |
 
 ## Notas de interpretacao
 

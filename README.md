@@ -22,6 +22,7 @@ Este fork preserva os nomes públicos dos comandos na fase atual, mas muda o con
 - Matriz de comandos: [docs/ofk/command-matrix.md](docs/ofk/command-matrix.md)
 - Cenários de teste: [docs/ofk/test-scenarios.md](docs/ofk/test-scenarios.md)
 - Registro técnico desta rodada: [docs/ofk/releases/2026-07-ofk-alignment.md](docs/ofk/releases/2026-07-ofk-alignment.md)
+- Importação opt-in do NotebookLM pessoal: [docs/ofk/releases/2026-07-notebooklm-import.md](docs/ofk/releases/2026-07-notebooklm-import.md)
 
 ## O problema
 
@@ -144,9 +145,9 @@ O comportamento do fork se organiza em quatro camadas:
 - **Contexto:** pessoas, projetos, mundo e retomada de contexto.
 - **Pesquisa:** web, X, YouTube, podcast e fluxos grounded.
 
-São **44 comandos** no total. O comando de calendário (`/obsidian-calendar`) permanece exclusivo do Claude Code, então os builds de Codex, Gemini, OpenCode, Hermes e Pi expõem 43 comandos multiplataforma.
+São **45 comandos** no total. O comando de calendário (`/obsidian-calendar`) permanece exclusivo do Claude Code, então os builds de Codex, Gemini, OpenCode, Hermes e Pi expõem 44 comandos multiplataforma.
 
-## 44 comandos
+## 45 comandos
 
 A classificação técnica dos comandos em `OKF-core`, `OKF + extensão` e `Obsidian-only` está em [docs/ofk/command-matrix.md](docs/ofk/command-matrix.md). Abaixo está a visão funcional para uso diário.
 
@@ -211,6 +212,7 @@ A classificação técnica dos comandos em `OKF-core`, `OKF + extensão` e `Obsi
 | `/research [topic]` | Produz um dossiê web com fatos, timeline, players, contrapontos e fontes. |
 | `/research-deep [topic]` | Parte do que já existe no vault e pesquisa só o delta necessário. |
 | `/notebooklm [topic]` | Faz síntese grounded a partir de notas relevantes do vault. |
+| `/notebooklm-import` | Importa, com confirmação, um notebook pessoal do NotebookLM como nota OKF validada. |
 | `/youtube [url]` | Incorpora transcript, metadados e sinais visuais de um vídeo. |
 | `/podcast [url]` | Resolve feed, transcript e transforma episódio em nota pesquisável. |
 
