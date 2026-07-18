@@ -12,7 +12,6 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from .lib.config import VAULT_PATH
 
 
 def read_fragment(fragment: Path) -> tuple[str, dict]:
@@ -93,8 +92,23 @@ def import_fragment(fragment: Path, root: Path, destination: Path) -> dict:
     return {"saved_note": relative_target(root, destination), "notebook_id": manifest["notebook_id"], "source_count": len(manifest["source_links"])}
 
 
+def resolve_exporter() -> str | None:
+    configured = os.environ.get("NOTEBOOKLM_TO_NOTES_BIN")
+    candidates = [configured] if configured else ["notebooklm-to-notes"]
+    for candidate in candidates:
+        if candidate and shutil.which(candidate):
+            return candidate
+    return None
+
+
 def export_fragment(notebook: str, fragment: Path) -> None:
-    binary = os.environ.get("NOTEBOOKLM_TO_NOTES_BIN", "notebooklm-to-notes")
+    binary = resolve_exporter()
+    if binary is None:
+        raise RuntimeError(
+            "notebooklm-to-notes não está disponível. "
+            "Instale/configure o exportador antes de usar /notebooklm-import, "
+            "ou defina NOTEBOOKLM_TO_NOTES_BIN com o caminho do binário."
+        )
     result = subprocess.run(
         [binary, "--profile", "okf-fragment", "--notebook", notebook, "--fragment-dir", str(fragment), "--json"],
         capture_output=True,
@@ -105,12 +119,33 @@ def export_fragment(notebook: str, fragment: Path) -> None:
         raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "exportador notebooklm-to-notes falhou")
 
 
+def preflight() -> dict:
+    configured = os.environ.get("NOTEBOOKLM_TO_NOTES_BIN")
+    resolved = resolve_exporter()
+    return {
+        "status": "ok" if resolved else "missing-exporter",
+        "exporter": configured or "notebooklm-to-notes",
+        "resolved_path": resolved,
+        "next_step": None
+        if resolved
+        else "Instale notebooklm-to-notes ou defina NOTEBOOKLM_TO_NOTES_BIN antes de importar.",
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--notebook", required=True)
-    parser.add_argument("--destination", required=True, help="caminho .md relativo ao bundle")
+    parser.add_argument("--notebook")
+    parser.add_argument("--destination", help="caminho .md relativo ao bundle")
     parser.add_argument("--fragment-dir", type=Path, help="fragmento existente para testes ou reimportação")
+    parser.add_argument("--preflight", action="store_true", help="verifica dependências locais sem importar")
     args = parser.parse_args()
+    if args.preflight:
+        print(json.dumps(preflight(), ensure_ascii=False, indent=2))
+        return 0
+    if not args.notebook or not args.destination:
+        parser.error("--notebook e --destination são obrigatórios, exceto com --preflight")
+    from .lib.config import VAULT_PATH
+
     root = VAULT_PATH
     if args.fragment_dir:
         result = import_fragment(args.fragment_dir, root, Path(args.destination))

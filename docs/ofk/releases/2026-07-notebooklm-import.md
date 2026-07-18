@@ -6,6 +6,7 @@
 - A nota final preserva `type` e permanece em UTF-8.
 - O comando adiciona uma entrada Markdown relativa ao `index.md` e registra o evento no `log.md` append-only.
 - O exportador externo é opt-in e não pode ser usado em CI, automação agendada ou ambiente com cookies compartilhados.
+- Antes da importação, o agente deve rodar `uv run -m scripts.research.notebooklm_import --preflight`; se o exportador estiver ausente, a falha deve ser explicada como dependência local faltante, não como problema de compartilhamento do notebook.
 
 ## Validação
 
