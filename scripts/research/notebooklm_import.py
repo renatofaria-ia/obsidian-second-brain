@@ -114,9 +114,12 @@ def export_fragment(notebook: str, fragment: Path) -> None:
         capture_output=True,
         text=True,
         encoding="utf-8",
+        errors="replace",
     )
     if result.returncode:
-        raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "exportador notebooklm-to-notes falhou")
+        stderr = (result.stderr or "").strip()
+        stdout = (result.stdout or "").strip()
+        raise RuntimeError(stderr or stdout or "exportador notebooklm-to-notes falhou")
 
 
 def preflight() -> dict:
